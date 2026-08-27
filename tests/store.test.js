@@ -99,4 +99,20 @@ describe('store', () => {
     expect(store2.list()).toHaveLength(1);
     expect(store2.createTimeline().no).toBe(2);   // 1'i tekrar vermez
   });
+
+  it('tüm timeline\'lar silinince nextNo meta değerinden devam eder', async () => {
+    // max-taramadan (0) değil, kalıcı nextNo meta değerinden (3) devam eder —
+    // load()'daki `saved > nextNo` dalını gerçekten çalıştıran tek senaryo.
+    const a = store.createTimeline();  // no 1, nextNo -> 2
+    const b = store.createTimeline();  // no 2, nextNo -> 3
+    await store.flush();
+    store.deleteTimeline(a.id);
+    store.deleteTimeline(b.id);
+    await store.flush();
+
+    const store2 = createStore(backend, { debounceMs: 300, now: () => 3000 });
+    await store2.load();
+    expect(store2.list()).toHaveLength(0);
+    expect(store2.createTimeline().no).toBe(3);   // 1'e DÖNMEZ
+  });
 });

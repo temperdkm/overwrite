@@ -14,6 +14,14 @@ export function createStore(backend, { debounceMs = 300, now = () => Date.now() 
   const dirty = new Set();
   const savedCallbacks = [];
 
+  // Arka uca giden, sonucu beklenmeyen (fire-and-forget) yazmaların hatasını
+  // sessizce yutmamak için: onSaved dinleyicileri başarıda argümansız,
+  // hatada Error ile çağrılır. Yeni bir hata-bildirme API'si eklemek yerine
+  // var olan onSaved mekanizması hem başarı hem hata için kullanılıyor.
+  function reportError(err) {
+    savedCallbacks.forEach(cb => cb(err));
+  }
+
   function touch(tl) {
     tl.guncelleme = now();
     dirty.add(tl.id);
@@ -22,7 +30,7 @@ export function createStore(backend, { debounceMs = 300, now = () => Date.now() 
 
   function schedule() {
     if (timer) clearTimeout(timer);
-    timer = setTimeout(() => { timer = null; flush(); }, debounceMs);
+    timer = setTimeout(() => { timer = null; flush().catch(reportError); }, debounceMs);
   }
 
   async function flush() {
@@ -54,7 +62,11 @@ export function createStore(backend, { debounceMs = 300, now = () => Date.now() 
         olusturma: now(), guncelleme: now()
       };
       timelines.push(tl);
-      backend.setMeta('nextNo', nextNo);
+      // createTimeline() eşzamanlı kalıp Timeline nesnesini hemen döndürmeli
+      // (çağıranlar sonucu beklemeden kullanıyor), bu yüzden burada await
+      // edilemez — ama hatası artık sessizce yutulmuyor, reportError ile
+      // onSaved dinleyicilerine bildiriliyor.
+      backend.setMeta('nextNo', nextNo).catch(reportError);
       dirty.add(tl.id);
       schedule();
       return tl;
@@ -63,7 +75,9 @@ export function createStore(backend, { debounceMs = 300, now = () => Date.now() 
     deleteTimeline(id) {
       timelines = timelines.filter(t => t.id !== id);
       dirty.delete(id);
-      backend.deleteTimeline(id);
+      // Arayüz void döndürür (eşzamanlı), bu yüzden burada da await edilemez —
+      // hata reportError ile bildiriliyor.
+      backend.deleteTimeline(id).catch(reportError);
     },
 
     addEntry(timelineId) {
@@ -93,6 +107,7 @@ export function createStore(backend, { debounceMs = 300, now = () => Date.now() 
     },
 
     flush,
+    // cb() başarılı yazmada, cb(err) fire-and-forget bir yazma başarısız olduğunda çağrılır.
     onSaved(cb) { savedCallbacks.push(cb); }
   };
 }
