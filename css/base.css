@@ -1,0 +1,36 @@
+* { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+
+html, body {
+  margin: 0;
+  padding: 0;
+  height: 100%;
+  background: var(--void);
+  color: var(--vio-br);
+  font-family: var(--font-mono);
+  overscroll-behavior: none;
+}
+
+/* iOS'ta ana ekran uygulamasında güvenli alanı boyar */
+body {
+  padding: env(safe-area-inset-top) env(safe-area-inset-right)
+           env(safe-area-inset-bottom) env(safe-area-inset-left);
+}
+
+#app {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  background: radial-gradient(130% 62% at 50% 42%, #1a1030 0%, var(--void) 70%);
+}
+
+.screen { position: absolute; inset: 0; transition: opacity .18s; }
+.screen[hidden] { display: block; opacity: 0; pointer-events: none; }
+
+/* Yer tutucu — :empty KULLANILMAZ, silince kalan <br> yüzünden tutmuyor */
+.ph:before {
+  content: attr(data-ph);
+  color: rgba(59,29,122,.42);
+  font-style: italic;
+  pointer-events: none;
+}
