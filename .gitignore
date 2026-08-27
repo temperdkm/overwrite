@@ -1,0 +1,9 @@
+node_modules/
+.superpowers/
+.DS_Store
+Thumbs.db
+
+# Yedek dosyaları asla depoya girmesin — notların herkese açık olurdu
+overwrite-yedek*.json
+*-yedek*.json
+backup*.json
