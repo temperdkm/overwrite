@@ -17,7 +17,7 @@ function isEmpty(el) {
  * :empty CSS kuralı tutmuyor ve yer tutucu bir daha görünmüyor.
  */
 function normalize(el) {
-  if (isEmpty(el)) el.innerHTML = '';
+  if (isEmpty(el)) el.textContent = '';
   el.classList.toggle('ph', isEmpty(el));
 }
 
