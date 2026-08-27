@@ -437,7 +437,7 @@ export function edgePoint(sheet, center) {
 npm test
 ```
 
-Beklenen: PASS — roman testleri dahil toplam 14 test
+Beklenen: PASS — yeni ring-math testleri ve Task 2'nin roman testleri, hepsi geçer
 
 - [ ] **Step 5: Commit**
 
@@ -840,7 +840,7 @@ export function createStore(backend, { debounceMs = 300, now = () => Date.now() 
 npm test
 ```
 
-Beklenen: PASS — toplam 25 test
+Beklenen: PASS — yeni db ve store testleri ile önceki testler, hepsi geçer
 
 - [ ] **Step 9: Commit**
 
@@ -1018,7 +1018,7 @@ export function bindEditable(el, { onChange }) {
 npm test
 ```
 
-Beklenen: PASS — toplam 33 test
+Beklenen: PASS — yeni editable testleri ile önceki testler, hepsi geçer
 
 - [ ] **Step 5: Commit**
 
@@ -2887,7 +2887,7 @@ export async function shareBackup(json, filename = 'overwrite-yedek.json') {
 npm test
 ```
 
-Beklenen: PASS — toplam 44 test
+Beklenen: PASS — yeni backup testleri ile önceki testler, hepsi geçer
 
 - [ ] **Step 5: Ayar paneli stilini ekle**
 
