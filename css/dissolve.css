@@ -42,8 +42,11 @@
    indi ve saydamlık erken düşüyor; kare gözden yükselmeden önce sönüyor.
    Parlama da kısıldı: büyük bir patlama "pop" hissi veriyordu. */
 @keyframes px-pop {
-  0%   { opacity: 1;   transform: translateY(0) scale(1);       filter: brightness(1.3) }
-  40%  { opacity: .65; transform: translateY(-5px) scale(.78);  filter: brightness(1.1) }
-  100% { opacity: 0;   transform: translateY(-14px) scale(.22); filter: brightness(1) }
+  0%   { opacity: 1;   transform: translateY(0) scale(1);
+         filter: brightness(1.3) }
+  40%  { opacity: .65; transform: translateY(calc(var(--px-yol) * -0.35)) scale(.78);
+         filter: brightness(1.1) }
+  100% { opacity: 0;   transform: translateY(calc(var(--px-yol) * -1)) scale(.22);
+         filter: brightness(1) }
 }
-.px.go { animation: px-pop .16s cubic-bezier(.4,0,.75,1) forwards }
+.px.go { animation: px-pop var(--px-sure) cubic-bezier(.4,0,.75,1) forwards }

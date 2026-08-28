@@ -18,11 +18,19 @@ const JITTER_FACTOR = [1, -0.85, 1.35, -1.1, 0.75];
 
 export const PIXEL_SIZE = 8;
 
-/* Bu ikisi css/dissolve.css ile EŞLEŞMELİ:
-   PIKSEL_SURE_MS  -> .px.go animasyon süresi (.16s)
-   IZGARA_BASLANGIC_MS -> pençe+glitch evresinin bittiği, ızgaranın göründüğü an */
-const PIKSEL_SURE_MS = 160;
+/* Pençe+glitch evresinin bittiği, ızgaranın göründüğü an. */
 const IZGARA_BASLANGIC_MS = 340;
+
+/* Buharlaşma ayarları CSS'ten okunur (css/tokens.css içindeki --px-*), böylece
+   süre hem animasyonda hem kapanış hesabında tek kaynaktan gelir ve tune.html
+   değerleri canlı değiştirdiğinde ikisi birden takip eder.
+   Her dağılmada yeniden okunuyor — modül yüklenirken bir kez okunsaydı canlı
+   değişiklikler kapanış zamanlamasına yansımazdı. */
+function cssSayi(ad, varsayilan) {
+  const ham = getComputedStyle(document.documentElement).getPropertyValue(ad).trim();
+  const n = parseFloat(ham);
+  return Number.isFinite(n) ? n : varsayilan;
+}
 
 const LINES = SLASHES.map(s => {
   const pts = [];
@@ -82,6 +90,10 @@ export function dissolveCard({ slot, card, onDone }) {
   slot.appendChild(svg);
 
   // 3) Piksel ızgarası — kalan eşit dağıtılır, kenarda ince şerit kalmaz
+  const pikselSure   = cssSayi('--px-sure', 160);
+  const satirGecikme = cssSayi('--px-satir', 7);
+  const rastgele     = cssSayi('--px-rastgele', 60);
+
   const cols = Math.max(1, Math.round(w / PIXEL_SIZE));
   const rows = Math.max(1, Math.round(h / PIXEL_SIZE));
   const cw = w / cols, ch = h / rows;
@@ -100,9 +112,7 @@ export function dissolveCard({ slot, card, onDone }) {
       d.style.backgroundSize = w + 'px ' + h + 'px';
       d.style.backgroundPosition = (-c * cw).toFixed(2) + 'px ' + (-r * ch).toFixed(2) + 'px';
       // Alt sıra önce gider: kart aşağıdan yukarı erir.
-      // Yayılma sıkılaştırıldı (satır 11->7 ms, rastgelelik 120->60 ms):
-      // eskiden son kare ~220 ms sonra başlıyordu ve dağılma sürünüyordu.
-      d.dataset.delay = ((rows - 1 - r) * 7 + Math.random() * 60).toFixed(0);
+      d.dataset.delay = ((rows - 1 - r) * satirGecikme + Math.random() * rastgele).toFixed(0);
       grid.appendChild(d);
     }
   }
@@ -127,7 +137,7 @@ export function dissolveCard({ slot, card, onDone }) {
      bir kartta da söndükten sonra boşuna beklenir. */
   const gecikmeler = [...grid.children].map(el => +el.dataset.delay || 0);
   const enGecGecikme = gecikmeler.length ? Math.max(...gecikmeler) : 0;
-  const pikselBitis = IZGARA_BASLANGIC_MS + enGecGecikme + PIKSEL_SURE_MS;
+  const pikselBitis = IZGARA_BASLANGIC_MS + enGecGecikme + pikselSure;
 
   setTimeout(() => {
     slot.style.transition = 'height .2s ease, margin .2s';

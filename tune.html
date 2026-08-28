@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#08060C">
+  <title>OVERWRITE — buharlaşma ayarı</title>
+  <link rel="stylesheet" href="css/tokens.css">
+  <link rel="stylesheet" href="css/base.css">
+  <link rel="stylesheet" href="css/screens.css">
+  <link rel="stylesheet" href="css/dissolve.css">
+  <style>
+    /* Bu sayfa yalnızca ayar denemek için. Uygulamanın parçası değil;
+       hangi ayar beğenilirse değerleri css/tokens.css'e yazılıp bu dosya
+       silinecek. */
+    html, body { overflow: auto }
+    body { display: block; padding: 16px 14px 40px }
+    h1 { font: 700 11px var(--font-mono); letter-spacing: 2px;
+         color: var(--vio-br); margin: 0 0 4px }
+    p.alt { font: 11px/1.6 var(--font-mono); color: #8B5CF6; margin: 0 0 18px }
+    .sahne { max-width: 380px; margin: 0 auto 20px; min-height: 130px }
+    .dugmeler { max-width: 380px; margin: 0 auto; display: flex;
+                flex-direction: column; gap: 9px }
+    .dugmeler button {
+      background: rgba(168,85,247,.14); border: 1px solid rgba(168,85,247,.55);
+      color: #E9D5FF; font: 700 11px var(--font-mono); letter-spacing: 1px;
+      border-radius: 4px; padding: 13px 12px; cursor: pointer; text-align: left;
+    }
+    .dugmeler button.secili { border-color: var(--vio-br); background: rgba(168,85,247,.3) }
+    .dugmeler button small { display: block; font-weight: 400; opacity: .6;
+                             letter-spacing: 0; margin-top: 4px }
+    .durum { max-width: 380px; margin: 16px auto 0; font: 10px/1.7 var(--font-mono);
+             color: #8B5CF6; opacity: .8 }
+  </style>
+</head>
+<body>
+  <h1>BUHARLAŞMA AYARI</h1>
+  <p class="alt">Bir ayara bas, kart dağılsın. Beğendiğini söyle, kalıcı yapayım.<br>
+     Kare süresi uzarsa küpleri tek tek görürsün; yayılma uzarsa efekt sürünür.</p>
+
+  <div class="sahne" id="sahne"></div>
+  <div class="dugmeler" id="dugmeler"></div>
+  <div class="durum" id="durum"></div>
+
+  <script type="module">
+    import { dissolveCard } from './js/dissolve.js';
+
+    const AYARLAR = [
+      { ad: '1 · ŞU ANKİ',            not: 'hızlı — küpler zor seçiliyor',
+        sure: 160, yol: 14, satir: 7,  rastgele: 60 },
+      { ad: '2 · KÜPLER GÖRÜNSÜN',    not: 'kare yavaş, yayılma sıkı — önerim bu',
+        sure: 420, yol: 18, satir: 5,  rastgele: 40 },
+      { ad: '3 · YÜKSELMESİZ',        not: 'hiç yükselmez, olduğu yerde söner',
+        sure: 400, yol: 0,  satir: 5,  rastgele: 40 },
+      { ad: '4 · ÇOK YAVAŞ',          not: 'iyice ağır, sürünüyor mu bak',
+        sure: 700, yol: 26, satir: 9,  rastgele: 90 },
+      { ad: '5 · ESKİ HALİ',          not: 'ilk şikâyet ettiğin hâli',
+        sure: 260, yol: 30, satir: 11, rastgele: 120 }
+    ];
+
+    const sahne = document.getElementById('sahne');
+    const durum = document.getElementById('durum');
+    let secili = AYARLAR[1];
+
+    function kartYap() {
+      sahne.textContent = '';
+      const slot = document.createElement('div');
+      slot.className = 'slot';
+      const card = document.createElement('div');
+      card.className = 'ecard';
+      card.innerHTML =
+        '<div class="erow">' +
+          '<div class="enum">ENTRY 0</div><div class="esep">-</div>' +
+          '<div class="ename">ÖLÇÜLER</div>' +
+          '<div class="edel">&#10005;</div>' +
+        '</div>' +
+        '<div class="etxt"></div>';
+      // Kullanıcı metni her zaman textContent ile yazılır.
+      card.querySelector('.etxt').textContent =
+        'Çukurun çapı 80 cm olacak. Duvar kalınlığı 8 mm yeterli, ' +
+        'daha kalını boşuna ağırlık yapar.';
+      slot.appendChild(card);
+      sahne.appendChild(slot);
+      return { slot, card };
+    }
+
+    function uygula(a) {
+      secili = a;
+      const k = document.documentElement.style;
+      k.setProperty('--px-sure', a.sure + 'ms');
+      k.setProperty('--px-yol', a.yol + 'px');
+      k.setProperty('--px-satir', a.satir + 'ms');
+      k.setProperty('--px-rastgele', a.rastgele + 'ms');
+      durum.textContent =
+        'Seçili: ' + a.ad.replace(/^\d+ · /, '') +
+        '  ·  kare süresi ' + a.sure + 'ms' +
+        '  ·  yükselme ' + a.yol + 'px' +
+        '  ·  yayılma ' + a.satir + '/' + a.rastgele + 'ms';
+      [...document.querySelectorAll('.dugmeler button')].forEach((b, i) => {
+        b.classList.toggle('secili', AYARLAR[i] === a);
+      });
+      oynat();
+    }
+
+    function oynat() {
+      const { slot, card } = kartYap();
+      // Kartın yerleşmesini bekle, sonra dağıt.
+      requestAnimationFrame(() => requestAnimationFrame(() => {
+        dissolveCard({ slot, card, onDone: () => setTimeout(kartYap, 500) });
+      }));
+    }
+
+    const kap = document.getElementById('dugmeler');
+    AYARLAR.forEach(a => {
+      const b = document.createElement('button');
+      b.type = 'button';
+      b.textContent = a.ad;
+      const s = document.createElement('small');
+      s.textContent = a.not;
+      b.appendChild(s);
+      b.addEventListener('click', () => uygula(a));
+      kap.appendChild(b);
+    });
+
+    uygula(secili);
+  </script>
+</body>
+</html>

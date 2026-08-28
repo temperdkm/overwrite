@@ -44,6 +44,16 @@
      Bu sayiyi degistirmek butun arayuzu birlikte olcekler. */
   --ui: 1.35;
 
+  /* Piksel buharlaşmasının ayarları tek yerde. tune.html bunları canlı
+     değiştirip telefonda karşılaştırma yapmaya yarıyor; hangisi beğenilirse
+     değerler buraya yazılır. --px-sure BİR KARENİN sönme süresi (uzarsa
+     küpler tek tek görünür), --px-satir/--px-rastgele ise BÜTÜN kartın
+     yayılma süresi (uzarsa efekt sürünür). İkisi ayrı ayarlanmalı. */
+  --px-sure: 160ms;
+  --px-yol: 14px;
+  --px-satir: 7ms;
+  --px-rastgele: 60ms;
+
   --sheet-w: calc(82px * var(--ui));
   --sheet-h: calc(114px * var(--ui));
 
