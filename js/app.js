@@ -2,6 +2,7 @@ import * as backend from './db.js';
 import { createStore } from './store.js';
 import { createRingScreen } from './ring.js';
 import { createTimelineScreen } from './timeline.js';
+import { requestPersistence, isStandalone } from './platform.js';
 
 const store = createStore(backend);
 const ringRoot = document.getElementById('screen-ring');
@@ -32,6 +33,14 @@ async function boot() {
     if (document.visibilityState === 'hidden') store.flush();
   });
   window.addEventListener('pagehide', () => store.flush());
+
+  const { supported, granted } = await requestPersistence();
+  console.log('kalıcı depolama:', { supported, granted, standalone: isStandalone() });
+
+  if ('serviceWorker' in navigator) {
+    navigator.serviceWorker.register('./sw.js').catch(err =>
+      console.warn('service worker kaydedilemedi:', err));
+  }
 }
 
 boot();
