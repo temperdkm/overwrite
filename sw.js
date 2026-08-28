@@ -57,8 +57,19 @@ self.addEventListener('fetch', (e) => {
   e.respondWith(
     caches.match(e.request).then(hit => hit || fetch(e.request).then(res => {
       const copy = res.clone();
-      caches.open(CACHE).then(c => c.put(e.request, copy)).catch(() => {});
+      /* Sadece başarılı yanıtlar önbelleğe alınır: fetch() ağ hatasında reddeder
+         ama 404/500 gibi HTTP hatalarında normal şekilde çözülür (res.ok === false).
+         Kontrol olmazsa bir hata sayfası sonsuza dek (CACHE sürümü değişene kadar)
+         önbellekten sunulurdu. */
+      if (res.ok) caches.open(CACHE).then(c => c.put(e.request, copy)).catch(() => {});
       return res;
-    }).catch(() => caches.match('./index.html')))
+    }).catch(err => {
+      /* index.html'e düşüş sadece sayfa navigasyonları içindir. Aksi halde
+         önbellekte olmayan bir modül isteği (örn. henüz cache'lenmemiş bir
+         Task 12/13 dosyası) HTML içeriğiyle çözülür ve modül değerlendirmesi
+         bütünüyle bozulur — boş ekran hatasının asıl sebebi budur. */
+      if (e.request.mode === 'navigate') return caches.match('./index.html');
+      throw err;
+    }))
   );
 });
