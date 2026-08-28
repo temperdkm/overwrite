@@ -5,11 +5,38 @@ const STORE_META = 'meta';
 
 let dbPromise = null;
 
+/* WebKit'te indexedDB.open() bazen NE onsuccess NE onerror tetikler
+   (bfcache'ten dönüş, bellek baskısı altında soğuk açılış). Zaman aşımı
+   olmazsa açılış sözü hiç sonuçlanmaz: uygulama sonsuza dek siyah ekranda
+   asılı kalır ve hata da yakalanamaz. Süre dolunca reddedilir, böylece
+   app.js hatayı yakalayıp "TEKRAR DENE" panelini gösterebilir. */
+const OPEN_TIMEOUT_MS = 5000;
+
 /** Veritabanını açar (bir kez), sonraki çağrılarda aynı bağlantıyı verir. */
 export function openDb() {
   if (dbPromise) return dbPromise;
-  dbPromise = new Promise((resolve, reject) => {
-    const req = indexedDB.open(DB_NAME, DB_VERSION);
+
+  const acilis = new Promise((resolve, reject) => {
+    let bitti = false;
+    let sure = null;
+    const sonlandir = (fn, deger) => {
+      if (bitti) return;
+      bitti = true;
+      clearTimeout(sure);
+      fn(deger);
+    };
+    sure = setTimeout(
+      () => sonlandir(reject, new Error('IndexedDB açılmadı (zaman aşımı)')),
+      OPEN_TIMEOUT_MS
+    );
+
+    let req;
+    try {
+      req = indexedDB.open(DB_NAME, DB_VERSION);
+    } catch (err) {
+      sonlandir(reject, err);
+      return;
+    }
     req.onupgradeneeded = () => {
       const db = req.result;
       if (!db.objectStoreNames.contains(STORE_TIMELINES)) {
@@ -19,10 +46,21 @@ export function openDb() {
         db.createObjectStore(STORE_META);
       }
     };
-    req.onsuccess = () => resolve(req.result);
-    req.onerror = () => reject(req.error);
+    req.onsuccess = () => sonlandir(resolve, req.result);
+    req.onerror = () => sonlandir(reject, req.error || new Error('IndexedDB açılamadı'));
+    // Başka bir sekmede eski sürüm açık kaldıysa istek süresiz beklerdi.
+    req.onblocked = () => sonlandir(reject, new Error('IndexedDB engellendi (başka bir sekme açık olabilir)'));
   });
-  return dbPromise;
+
+  // Reddedilen söz KALICI olarak önbelleğe alınmaz: aksi halde ilk hatadan
+  // sonra modülün ömrü boyunca herkes aynı hatayı alırdı ve oturum içinde
+  // "TEKRAR DENE" hiçbir şeyi değiştiremezdi.
+  const sonuc = acilis.catch(err => {
+    if (dbPromise === sonuc) dbPromise = null;
+    throw err;
+  });
+  dbPromise = sonuc;
+  return sonuc;
 }
 
 function tx(db, store, mode) {

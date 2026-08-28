@@ -43,10 +43,22 @@ export function createTimelineScreen({ root, store, onBack }) {
     }
   });
 
-  store.onSaved(() => {
-    savedEl.classList.remove('show');
+  /* onSaved başarıda argümansız, HATADA Error ile çağrılır (bkz. store.js).
+     Parametre okunmazsa başarısız bir yazma da "KAYDEDİLDİ" gösterir —
+     verinin tek kopyası olan bir uygulamada sessiz hatadan beter, aktif
+     yanlış güvence. Hata mesajı tehlike renginde ve SÖNMEZ: bir sonraki
+     başarılı yazmaya kadar ekranda kalır. */
+  store.onSaved((err) => {
+    savedEl.classList.remove('show', 'fail');
     void savedEl.offsetWidth;
-    savedEl.classList.add('show');
+    if (err) {
+      console.error('kaydedilemedi:', err);
+      savedEl.textContent = '▖ KAYDEDİLEMEDİ';
+      savedEl.classList.add('fail');
+    } else {
+      savedEl.textContent = '▖ KAYDEDİLDİ';
+      savedEl.classList.add('show');
+    }
   });
 
   function meta() {

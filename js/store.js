@@ -33,15 +33,36 @@ export function createStore(backend, { debounceMs = 300, now = () => Date.now() 
     timer = setTimeout(() => { timer = null; flush().catch(reportError); }, debounceMs);
   }
 
+  /**
+   * Bekleyen değişiklikleri diske yazar.
+   * Bir yazma başarısız olursa o id dirty'ye GERİ KONUR ve döngü kalan
+   * id'lerle devam eder: eskiden ids kopyalanıp dirty baştan temizlendiği
+   * için ikinci yazmanın hatası hem üçüncüyü hiç denemiyor hem de her iki
+   * değişikliği kalıcı olarak kaybediyordu.
+   * Başarı yalnızca gerçekten yazılan id varsa bildirilir; hata çağırana
+   * fırlatılır (çağıranlar reportError'a yönlendirir) — böylece aynı hata
+   * iki kez bildirilmez.
+   */
   async function flush() {
     if (timer) { clearTimeout(timer); timer = null; }
     const ids = [...dirty];
     dirty.clear();
+    const yazilan = [];
+    let ilkHata = null;
     for (const id of ids) {
       const tl = timelines.find(t => t.id === id);
-      if (tl) await backend.putTimeline(tl);
+      // Akış sırasında silinen timeline diriltilmez: atlanır, dirty'ye dönmez.
+      if (!tl) continue;
+      try {
+        await backend.putTimeline(tl);
+        yazilan.push(id);
+      } catch (err) {
+        dirty.add(id);                 // sonraki flush'ta yeniden denenir
+        if (!ilkHata) ilkHata = err;
+      }
     }
-    if (ids.length) savedCallbacks.forEach(cb => cb());
+    if (yazilan.length) savedCallbacks.forEach(cb => cb());
+    if (ilkHata) throw ilkHata;
   }
 
   return {
@@ -107,7 +128,10 @@ export function createStore(backend, { debounceMs = 300, now = () => Date.now() 
     },
 
     flush,
-    // cb() başarılı yazmada, cb(err) fire-and-forget bir yazma başarısız olduğunda çağrılır.
+    // flush()'ı bekleyen çağıranlar hatayı buraya yönlendirir
+    // (`store.flush().catch(store.reportError)`), böylece sessizce yutulmaz.
+    reportError,
+    // cb() başarılı yazmada, cb(err) bir yazma başarısız olduğunda çağrılır.
     onSaved(cb) { savedCallbacks.push(cb); }
   };
 }

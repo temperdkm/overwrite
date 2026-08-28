@@ -9,6 +9,8 @@ const ringRoot = document.getElementById('screen-ring');
 const tlRoot   = document.getElementById('screen-timeline');
 
 let ring, timeline;
+let acildi = false;      // boot() sonuna kadar geldi mi
+let panelGosterildi = false;
 
 function showRing() {
   tlRoot.setAttribute('hidden', '');
@@ -22,25 +24,108 @@ function showTimeline(id) {
   timeline.open(id);
 }
 
+/**
+ * Açılış başarısız olursa GÖRÜNÜR bir hata paneli çizer.
+ * index.html iki boş <section> ile geliyor: panel olmazsa kullanıcı sadece
+ * koyu degradeyi görür ve "yükleniyor" ile "bozuldu" ayırt edilemez.
+ * Hata metni innerHTML ile DEĞİL, textContent ile yazılır.
+ */
+function acilisBasarisiz(err) {
+  if (panelGosterildi) return;
+  panelGosterildi = true;
+  console.error('açılış başarısız:', err);
+
+  // Yarım kalmış ekranların rAF/interval döngüleri boşuna dönmesin
+  try { if (ring) ring.destroy(); } catch (e) { /* yoksay */ }
+  try { if (timeline) timeline.destroy(); } catch (e) { /* yoksay */ }
+
+  tlRoot.setAttribute('hidden', '');
+  ringRoot.removeAttribute('hidden');
+  ringRoot.style.pointerEvents = '';   // yükleme kilidi kalkmalı ki butona basılabilsin
+  ringRoot.textContent = '';           // innerHTML KULLANILMAZ
+
+  const kutu = document.createElement('div');
+  kutu.className = 'boot-fail';
+
+  const baslik = document.createElement('div');
+  baslik.className = 'boot-fail-title';
+  baslik.textContent = 'BAŞLATILAMADI';
+
+  const mesaj = document.createElement('div');
+  mesaj.className = 'boot-fail-msg';
+  mesaj.textContent = 'Uygulama açılamadı. Notların silinmedi — bu açılışta ' +
+                      'telefonun deposu okunamadı. Tekrar dene.';
+
+  const ayrinti = document.createElement('div');
+  ayrinti.className = 'boot-fail-detail';
+  ayrinti.textContent = String((err && err.message) || err || 'bilinmeyen hata');
+
+  const btn = document.createElement('button');
+  btn.type = 'button';
+  btn.className = 'boot-fail-retry';
+  btn.textContent = 'TEKRAR DENE';
+  btn.addEventListener('click', () => location.reload());
+
+  kutu.appendChild(baslik);
+  kutu.appendChild(mesaj);
+  kutu.appendChild(ayrinti);
+  kutu.appendChild(btn);
+  ringRoot.appendChild(kutu);
+}
+
 async function boot() {
-  await store.load();
-  ring = createRingScreen({ root: ringRoot, store, onOpen: showTimeline });
-  timeline = createTimelineScreen({ root: tlRoot, store, onBack: showRing });
-  ring.render();
-
-  // Sayfa gizlenirken bekleyen yazma varsa hemen diske yaz
-  document.addEventListener('visibilitychange', () => {
-    if (document.visibilityState === 'hidden') store.flush();
-  });
-  window.addEventListener('pagehide', () => store.flush());
-
-  const { supported, granted } = await requestPersistence();
-  console.log('kalıcı depolama:', { supported, granted, standalone: isStandalone() });
-
+  /* Service worker EN BAŞTA kaydedilir, store.load()'dan ÖNCE.
+     Aksi halde ilk açılıştaki bir veritabanı hatası çevrimdışı önbelleğin
+     hiç kurulmaması demekti: sonraki açılış, ağ çalışsa bile aynı şekilde
+     başarısız olurdu. */
   if ('serviceWorker' in navigator) {
     navigator.serviceWorker.register('./sw.js').catch(err =>
       console.warn('service worker kaydedilemedi:', err));
   }
+
+  /* Kabuk veritabanından ÖNCE çizilir: açılışta siyah ekran ile bozulmuş
+     ekran kullanıcı gözünde birbirinin aynısıydı. */
+  ring = createRingScreen({ root: ringRoot, store, onOpen: showTimeline });
+  const bosSatir = ringRoot.querySelector('#ringEmpty');
+  if (bosSatir) bosSatir.style.display = 'none';  // veri yüklenmeden "hiçbir şey yok" denmez
+  ringRoot.style.pointerEvents = 'none';          // yükleme bitmeden yeni timeline açılmasın
+
+  await store.load();
+
+  ringRoot.style.pointerEvents = '';
+  if (bosSatir) bosSatir.style.display = '';
+  timeline = createTimelineScreen({ root: tlRoot, store, onBack: showRing });
+  ring.render();
+  acildi = true;
+
+  /* Sayfa gizlenirken bekleyen yazma varsa hemen diske yaz.
+     Bunlar en kritik yazmalar (uygulama askıya alınmak üzere), bu yüzden
+     hataları yutulmaz: gecikmeli yolun kullandığı bildiriciye yönlendirilir,
+     kullanıcı KAYDEDİLEMEDİ göstergesini görür. */
+  document.addEventListener('visibilitychange', () => {
+    if (document.visibilityState === 'hidden') store.flush().catch(store.reportError);
+  });
+  window.addEventListener('pagehide', () => store.flush().catch(store.reportError));
+
+  // Kalıcı depolama isteği açılışı bloklamaz ve başarısızlığı açılışı düşürmez.
+  requestPersistence()
+    .then(({ supported, granted }) =>
+      console.log('kalıcı depolama:', { supported, granted, standalone: isStandalone() }))
+    .catch(err => console.warn('kalıcı depolama istenemedi:', err));
 }
 
-boot();
+// Ağ: sözü tutulmayan bir hata açılış sırasında olursa ekran boş kalmasın.
+window.addEventListener('unhandledrejection', (e) => {
+  console.error('yakalanmamış hata:', e.reason);
+  if (!acildi) acilisBasarisiz(e.reason);
+});
+
+async function start() {
+  try {
+    await boot();
+  } catch (err) {
+    acilisBasarisiz(err);
+  }
+}
+
+start();

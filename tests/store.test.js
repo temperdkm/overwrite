@@ -89,6 +89,50 @@ describe('store', () => {
     expect(saved.eskiEntryler).toBeUndefined();
   });
 
+  it('yazma başarısız olunca onSaved Error alır ve değişiklik KAYBOLMAZ', async () => {
+    const spy = vi.fn();
+    store.onSaved(spy);
+    const gercekYazma = backend.putTimeline.bind(backend);
+    const hata = new Error('depolama dolu');
+
+    const tl = store.createTimeline();
+    store.update(tl.id, t => { t.ad = 'ÖNEMLİ'; });
+    backend.putTimeline = () => Promise.reject(hata);
+    await vi.advanceTimersByTimeAsync(320);
+
+    // Başarı bildirilmez, hata Error ile bildirilir (KAYDEDİLDİ yazmasın diye)
+    expect(spy).toHaveBeenCalledTimes(1);
+    expect(spy).toHaveBeenCalledWith(hata);
+    expect(backend.rows.has(tl.id)).toBe(false);
+
+    // id dirty'de kaldı: arka uç düzelince aynı değişiklik yeniden denenir
+    backend.putTimeline = gercekYazma;
+    await store.flush();
+    expect(backend.rows.get(tl.id).ad).toBe('ÖNEMLİ');
+  });
+
+  it('bir yazma patlasa da sıradaki timeline yazılır', async () => {
+    // Eski flush() dirty'yi baştan temizliyordu: ikinci yazma reddedince
+    // üçüncü hiç denenmiyor ve ikisinin değişikliği de kalıcı olarak
+    // kayboluyordu — üstelik kullanıcıya "KAYDEDİLDİ" gösterilerek.
+    const gercekYazma = backend.putTimeline.bind(backend);
+    const a = store.createTimeline();
+    const b = store.createTimeline();
+    await store.flush();
+
+    store.update(a.id, t => { t.ad = 'A2'; });
+    store.update(b.id, t => { t.ad = 'B2'; });
+    backend.putTimeline = (tl) =>
+      tl.id === a.id ? Promise.reject(new Error('a yazılamadı')) : gercekYazma(tl);
+
+    await expect(store.flush()).rejects.toThrow('a yazılamadı');
+    expect(backend.rows.get(b.id).ad).toBe('B2');   // sıradaki yine de denendi
+
+    backend.putTimeline = gercekYazma;
+    await store.flush();
+    expect(backend.rows.get(a.id).ad).toBe('A2');   // başarısız olan geri geldi
+  });
+
   it('kaydedilmiş veriyi geri yükler ve sayaçları sürdürür', async () => {
     const tl = store.createTimeline();
     store.addEntry(tl.id);

@@ -1,4 +1,8 @@
-const CACHE = 'overwrite-v1';
+/* ⚠ HER YAYINDA (git push) BU SÜRÜM NUMARASI ARTIRILACAK — aksi halde kurulu
+   uygulama mevcut sürümünde DONAR: fetch her şeyde önce önbelleğe bakar ve yeni
+   service worker yalnızca sw.js'in kendi baytları değişince kurulur, yani
+   telefondaki uygulamaya değişen js/css dosyaları hiç ulaşmaz. */
+const CACHE = 'overwrite-v2';
 const ASSETS = [
   './',
   './index.html',
@@ -29,14 +33,17 @@ const ASSETS = [
 
 /* addAll KULLANILMAZ: listedeki tek bir dosya bile 404 verirse
    kurulumun tamamı başarısız olur ve çevrimdışı çalışma hiç kurulmaz.
-   Bu liste henüz yazılmamış dosyaları da içeriyor (dissolve.js Task 12'de,
-   backup.js Task 13'te geliyor), o yüzden her dosya tek tek ve
-   hatası yutularak önbelleğe alınır. */
+   Bu liste henüz yazılmamış dosyaları da içeriyor (backup.js Task 13'te
+   geliyor), o yüzden her dosya tek tek ve hatası yutularak önbelleğe alınır.
+
+   cache: 'reload': istek tarayıcının KENDİ HTTP önbelleğini atlar. GitHub
+   Pages dosyaları 10 dakika boyunca önbelleklettiği için, sürüm artırılıp
+   yeniden kurulsa bile eski baytlar service worker önbelleğine kopyalanabilirdi. */
 self.addEventListener('install', (e) => {
   e.waitUntil(
     caches.open(CACHE)
       .then(c => Promise.all(
-        ASSETS.map(url => c.add(url).catch(err => {
+        ASSETS.map(url => c.add(new Request(url, { cache: 'reload' })).catch(err => {
           console.warn('önbelleğe alınamadı (atlandı):', url, err.message);
         }))
       ))
