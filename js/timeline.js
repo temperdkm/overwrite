@@ -116,12 +116,14 @@ export function createTimelineScreen({ root, store, onBack }) {
   function eraseTimeline() {
     const tl = store.get(openId);
     if (!tl) return;
+    // Veri hemen silinir; animasyon yalnızca kozmetiktir ve tamamlanmasını
+    // beklemek, uygulama arka planda kapatılırsa silmeyi iptal edebilirdi.
+    store.deleteTimeline(tl.id);
+    openId = null;
     let closed = false;
     const close = () => {
       if (closed) return;
       closed = true;
-      store.deleteTimeline(tl.id);
-      openId = null;
       onBack();
     };
     dissolveAll({ scroll, onDone: close });

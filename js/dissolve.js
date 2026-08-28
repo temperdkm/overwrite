@@ -137,6 +137,9 @@ export function dissolveAll({ scroll, onEach, onDone }) {
     return r.bottom > box.top + 2 && r.top < box.bottom - 2;
   });
 
+  // Ekranda görünmeyen kartlar efekti oynatmaz; sessizce kaldırılır.
+  all.forEach(s => { if (!visible.includes(s)) s.remove(); });
+
   if (!visible.length) { setTimeout(onDone, 320); return; }
 
   const MAX_CONCURRENT = 3, GAP = 150;
