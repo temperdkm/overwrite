@@ -184,7 +184,8 @@ export function createRingScreen({ root, store, onOpen }) {
     render();
   }
 
-  window.addEventListener('resize', () => render());
+  const onResize = () => render();
+  window.addEventListener('resize', onResize);
 
   // Buton kendiliğinden bozulsun. Çember ekranındayken tek buton var,
   // o yüzden aralık 3 sn; ilk açılışta (hiç timeline yokken) 2 sn —
@@ -203,6 +204,7 @@ export function createRingScreen({ root, store, onOpen }) {
     owButton: owBtn,
     destroy() {
       if (rafId) cancelAnimationFrame(rafId);
+      window.removeEventListener('resize', onResize);
       clearInterval(idleTimer);
       clearInterval(firstRunTimer);
     }
