@@ -1,0 +1,45 @@
+.piece-wrap { position: absolute; left: 0; top: 0; right: 0; pointer-events: none; will-change: transform, opacity }
+.piece { position: relative; will-change: transform, opacity }
+
+/* Şeritler OVERWRITE butonundaki glitch'le aynı geometride kayar. */
+@keyframes claw-glitch {
+  0%   { transform: translate(0,0) rotate(0deg); opacity: 1 }
+  10%  { transform: translate(var(--nx), var(--ny)) rotate(var(--nr)); opacity: 1 }
+  22%  { transform: translate(calc(var(--nx) - 19px * var(--jf)), var(--ny)) rotate(var(--nr)); opacity: 1 }
+  32%  { transform: translate(calc(var(--nx) + 24px * var(--jf)), var(--ny)) rotate(var(--nr)); opacity: .12 }
+  42%  { transform: translate(calc(var(--nx) - 11px * var(--jf)), var(--ny)) rotate(var(--nr)); opacity: 1 }
+  54%  { transform: translate(calc(var(--nx) + 17px * var(--jf)), var(--ny)) rotate(var(--nr)); opacity: 1 }
+  66%  { transform: translate(calc(var(--nx) - 25px * var(--jf)), var(--ny)) rotate(var(--nr)); opacity: .08 }
+  78%  { transform: translate(calc(var(--nx) + 9px  * var(--jf)), var(--ny)) rotate(var(--nr)); opacity: 1 }
+  90%  { transform: translate(calc(var(--nx) - 14px * var(--jf)), var(--ny)) rotate(var(--nr)); opacity: 1 }
+  100% { transform: translate(var(--nx), var(--ny)) rotate(var(--nr)); opacity: 1 }
+}
+.dissolving .piece { animation: claw-glitch .34s steps(1,end) forwards }
+
+.claw-streaks { position: absolute; inset: 0; pointer-events: none; z-index: 9; overflow: visible }
+.claw-streaks path {
+  stroke: #fff; fill: none; vector-effect: non-scaling-stroke; opacity: 0;
+  filter: drop-shadow(0 0 4px #fff) drop-shadow(0 0 11px #E9C4FF);
+}
+@keyframes claw-flash {
+  0% { opacity: 0; stroke-width: .4 } 16% { opacity: 1; stroke-width: 3.6 }
+  48% { opacity: .85; stroke-width: 1.4 } 100% { opacity: 0; stroke-width: .3 }
+}
+.dissolving .claw-streaks path { animation: claw-flash .27s ease-out forwards }
+
+.px-grid { position: absolute; left: 0; top: 0; pointer-events: none; z-index: 12; display: none }
+.px-grid.on { display: block }
+
+/* will-change YOK: binlerce kareye ayrı grafik katmanı ayırtmak
+   telefonu kasan asıl sebep. Ölçüldü: 4325 elemandan 1363'e düşüş. */
+.px {
+  position: absolute; background-image: var(--cardbg); background-repeat: no-repeat;
+  box-shadow: 0 0 4px rgba(199,125,255,.6);
+}
+@keyframes px-pop {
+  0%   { opacity: 1;   transform: translateY(0) scale(1);      filter: brightness(1) }
+  30%  { opacity: 1;   transform: translateY(-3px) scale(1.22); filter: brightness(1.9) }
+  60%  { opacity: .75; transform: translateY(-11px) scale(.92); filter: brightness(1.3) }
+  100% { opacity: 0;   transform: translateY(-30px) scale(.35); filter: brightness(1) }
+}
+.px.go { animation: px-pop .26s cubic-bezier(.3,.1,.6,1) forwards }

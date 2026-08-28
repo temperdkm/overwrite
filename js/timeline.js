@@ -1,6 +1,7 @@
 import { roman } from './roman.js';
 import { bindEditable, setText } from './editable.js';
 import { makeGlitchButton, idleGlitch } from './glitch.js';
+import { dissolveCard, dissolveAll } from './dissolve.js';
 
 export function createTimelineScreen({ root, store, onBack }) {
   root.innerHTML =
@@ -84,8 +85,7 @@ export function createTimelineScreen({ root, store, onBack }) {
 
     card.querySelector('.edel').addEventListener('click', () => {
       store.deleteEntry(tl.id, en.id);
-      slot.remove();
-      meta();
+      dissolveCard({ slot, card, onDone: meta });
     });
 
     return slot;
@@ -116,9 +116,15 @@ export function createTimelineScreen({ root, store, onBack }) {
   function eraseTimeline() {
     const tl = store.get(openId);
     if (!tl) return;
-    store.deleteTimeline(tl.id);
-    openId = null;
-    onBack();
+    let closed = false;
+    const close = () => {
+      if (closed) return;
+      closed = true;
+      store.deleteTimeline(tl.id);
+      openId = null;
+      onBack();
+    };
+    dissolveAll({ scroll, onDone: close });
   }
 
   return {
