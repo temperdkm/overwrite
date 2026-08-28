@@ -1,11 +1,16 @@
-import { makeGlitchButton, fireGlitch, idleGlitch } from './glitch.js';
+import * as backend from './db.js';
+import { createStore } from './store.js';
+import { createRingScreen } from './ring.js';
 
-const host = document.getElementById('screen-ring');
-host.style.cssText = 'display:flex;flex-direction:column;gap:22px;align-items:center;justify-content:center';
+const store = createStore(backend);
 
-const ow    = makeGlitchButton({ label: 'OVERWRITE', variant: 'big',    onClick: () => {} });
-const erase = makeGlitchButton({ label: 'ERASE',     variant: 'danger', onClick: () => {} });
-const back  = makeGlitchButton({ label: '◄ GERI',                        onClick: () => {} });
-host.append(ow, erase, back);
+async function boot() {
+  await store.load();
+  createRingScreen({
+    root: document.getElementById('screen-ring'),
+    store,
+    onOpen: (id) => { console.log('timeline açılacak:', id); }
+  }).render();
+}
 
-idleGlitch(() => [ow, erase, back], 1500);
+boot();
