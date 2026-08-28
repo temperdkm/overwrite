@@ -16,10 +16,16 @@ body {
            env(safe-area-inset-bottom) env(safe-area-inset-left);
 }
 
+/* Uygulama telefon için tasarlandı ve çember geometrisi ekran genişliğine
+   oranlı hesaplanıyor. Sınır olmadan geniş bir masaüstü ekranında föyler
+   birbirinden uzaklaşıp dağılıyor. 480px telefonun üstünde bir değer, yani
+   asıl cihazda hiçbir etkisi yok; sadece masaüstünde gerçek oranları gösterir. */
 #app {
   position: relative;
   width: 100%;
+  max-width: 480px;
   height: 100%;
+  margin: 0 auto;
   overflow: hidden;
   background: radial-gradient(130% 62% at 50% 42%, #1a1030 0%, var(--void) 70%);
 }

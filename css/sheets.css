@@ -55,6 +55,14 @@
   font: 700 8px var(--font-mono); letter-spacing: 2px; color: #8B5CF6; opacity: .75; line-height: 1.9;
 }
 .ring-ow { position: absolute; left: 28px; right: 28px; top: 46%; z-index: 30 }
+/* OVERWRITE butonu kabını enine doldurmalı — tasarımda ekranı kesen geniş bir
+   levha. .gb varsayılan olarak inline-block olduğu için aksi halde sola yaslanıp
+   içerik genişliğinde kalıyor.
+   .slice'a right:0 ŞART: şeritler absolute konumlu ve yalnızca left/top verili,
+   yani içeriğe göre daralırlar. Bu satır olmadan bozulma anındaki şeritler asıl
+   butondan dar kalır ve glitch kayık görünür. */
+.ring-ow .gb { display: block }
+.ring-ow .gb .slice { right: 0 }
 .ring-nav {
   position: absolute; bottom: 12px; left: 0; right: 0; z-index: 60;
   display: flex; align-items: center; justify-content: center; gap: 12px;
