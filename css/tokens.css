@@ -39,8 +39,13 @@
     rgba(243,229,255,.97) 100%);
   --card-border: rgba(240,224,255,.9);
 
-  --sheet-w: 82px;
-  --sheet-h: 114px;
+  /* TEK OLCEK DUGMESI. Tasarim 290px'lik bir maket uzerinde yapildi;
+     gercek iPhone 390px+, o yuzden her sey orantili olarak buyutuluyor.
+     Bu sayiyi degistirmek butun arayuzu birlikte olcekler. */
+  --ui: 1.35;
+
+  --sheet-w: calc(82px * var(--ui));
+  --sheet-h: calc(114px * var(--ui));
 
   --font-pixel: 'Press Start 2P', monospace;
   --font-mono: 'Courier New', Courier, monospace;

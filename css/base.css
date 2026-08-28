@@ -1,9 +1,14 @@
-* { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+/* touch-action: manipulation, iOS'un cift dokunma ile yakinlastirma jestini
+   kapatir. user-scalable=no iOS 10'dan beri yok sayiliyor, o yuzden kenara iki
+   kez dokununca ekran kayiyordu. */
+* { box-sizing: border-box; -webkit-tap-highlight-color: transparent;
+    touch-action: manipulation; }
 
 html, body {
   margin: 0;
   padding: 0;
   height: 100%;
+  overflow: hidden;
   background: var(--void);
   color: var(--vio-br);
   font-family: var(--font-mono);

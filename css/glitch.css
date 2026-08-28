@@ -33,15 +33,15 @@
 }
 .chip .in {
   border: 1px solid var(--vio);
-  padding: 6px 9px;
+  padding: calc(6px * var(--ui)) calc(9px * var(--ui));
   font-family: var(--font-pixel);
-  font-size: 9px;
-  letter-spacing: 1px;
+  font-size: calc(9px * var(--ui));
+  letter-spacing: calc(1px * var(--ui));
   color: var(--vio-br);
   text-shadow: 1px 1px 0 var(--bevel), 0 0 8px rgba(228,196,255,.9), 0 0 18px rgba(168,85,247,.8);
   white-space: nowrap;
 }
-.chip.big { border-width: 3px; padding: 4px; }
-.chip.big .in { border-width: 2px; padding: 11px 4px; font-size: 13px; text-align: center; }
+.chip.big { border-width: 3px; padding: calc(4px * var(--ui)); }
+.chip.big .in { border-width: 2px; padding: calc(11px * var(--ui)) calc(4px * var(--ui)); font-size: calc(13px * var(--ui)); text-align: center; }
 .chip.danger { border-color: var(--danger); box-shadow: 0 0 2px #fff, 0 0 9px var(--danger), 0 0 22px rgba(240,80,154,.6); }
 .chip.danger .in { border-color: var(--danger); color: var(--danger-text); text-shadow: 1px 1px 0 #7A1140, 0 0 8px rgba(255,180,210,.9); }
