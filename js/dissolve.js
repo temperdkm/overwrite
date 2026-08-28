@@ -22,10 +22,10 @@ export const PIXEL_SIZE = 8;
 const IZGARA_BASLANGIC_MS = 340;
 
 /* Buharlaşma ayarları CSS'ten okunur (css/tokens.css içindeki --px-*), böylece
-   süre hem animasyonda hem kapanış hesabında tek kaynaktan gelir ve tune.html
-   değerleri canlı değiştirdiğinde ikisi birden takip eder.
-   Her dağılmada yeniden okunuyor — modül yüklenirken bir kez okunsaydı canlı
-   değişiklikler kapanış zamanlamasına yansımazdı. */
+   süre hem animasyonda hem kapanış hesabında tek kaynaktan gelir ve ikisi
+   birbirinden kayamaz.
+   Her dağılmada yeniden okunuyor, modül yüklenirken bir kez değil: değerler
+   çalışma anında değiştirilirse kapanış zamanlaması da onu takip etsin diye. */
 function cssSayi(ad, varsayilan) {
   const ham = getComputedStyle(document.documentElement).getPropertyValue(ad).trim();
   const n = parseFloat(ham);
