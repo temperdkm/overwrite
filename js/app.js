@@ -1,16 +1,37 @@
 import * as backend from './db.js';
 import { createStore } from './store.js';
 import { createRingScreen } from './ring.js';
+import { createTimelineScreen } from './timeline.js';
 
 const store = createStore(backend);
+const ringRoot = document.getElementById('screen-ring');
+const tlRoot   = document.getElementById('screen-timeline');
+
+let ring, timeline;
+
+function showRing() {
+  tlRoot.setAttribute('hidden', '');
+  ringRoot.removeAttribute('hidden');
+  ring.render();
+}
+
+function showTimeline(id) {
+  ringRoot.setAttribute('hidden', '');
+  tlRoot.removeAttribute('hidden');
+  timeline.open(id);
+}
 
 async function boot() {
   await store.load();
-  createRingScreen({
-    root: document.getElementById('screen-ring'),
-    store,
-    onOpen: (id) => { console.log('timeline açılacak:', id); }
-  }).render();
+  ring = createRingScreen({ root: ringRoot, store, onOpen: showTimeline });
+  timeline = createTimelineScreen({ root: tlRoot, store, onBack: showRing });
+  ring.render();
+
+  // Sayfa gizlenirken bekleyen yazma varsa hemen diske yaz
+  document.addEventListener('visibilitychange', () => {
+    if (document.visibilityState === 'hidden') store.flush();
+  });
+  window.addEventListener('pagehide', () => store.flush());
 }
 
 boot();
