@@ -6,10 +6,13 @@ function uid() {
  * Bellekteki model + gecikmeli kalıcı yazma.
  * backend, db.js ile aynı arayüzü sunan herhangi bir nesne olabilir
  * (testlerde sahte bir nesne veriliyor).
+ *
+ * NUMARALANDIRMA KONUMSALDIR: timeline numarası her zaman listedeki sırasıdır
+ * (1, 2, 3...), entry sırası da öyle (0, 1, 2...). Aradan biri silinince
+ * kalanlar kayar — TIMELINE II silinirse III yerine II olur. Boşluk kalmaz.
  */
 export function createStore(backend, { debounceMs = 300, now = () => Date.now() } = {}) {
   let timelines = [];
-  let nextNo = 1;
   let timer = null;
   const dirty = new Set();
   const savedCallbacks = [];
@@ -31,6 +34,36 @@ export function createStore(backend, { debounceMs = 300, now = () => Date.now() 
   function schedule() {
     if (timer) clearTimeout(timer);
     timer = setTimeout(() => { timer = null; flush().catch(reportError); }, debounceMs);
+  }
+
+  /**
+   * Bütün numaraları konuma göre yeniden yazar ve değişen kayıtların
+   * id'lerini döndürür. Silmelerden sonra çağrılır; ayrıca load()'da da
+   * çağrılır çünkü diskte numaraların kalıcı kimlik olduğu eski şemadan
+   * kalma boşluklu kayıtlar bulunabilir (ör. I ve III).
+   */
+  function renumber() {
+    const degisen = [];
+    timelines.forEach((tl, i) => {
+      let farkli = false;
+      if (tl.no !== i + 1) { tl.no = i + 1; farkli = true; }
+      tl.entries.forEach((en, j) => {
+        if (en.sira !== j) { en.sira = j; farkli = true; }
+      });
+      // nextSira artık numarayı üretmiyor (konum üretiyor) ama kayıt
+      // biçiminin bir parçası; tutarlı kalsın diye güncel tutuluyor.
+      if (tl.nextSira !== tl.entries.length) { tl.nextSira = tl.entries.length; farkli = true; }
+      if (farkli) { tl.guncelleme = now(); degisen.push(tl.id); }
+    });
+    return degisen;
+  }
+
+  function renumberVeYaz() {
+    const degisen = renumber();
+    if (degisen.length) {
+      degisen.forEach(id => dirty.add(id));
+      schedule();
+    }
   }
 
   /**
@@ -68,10 +101,9 @@ export function createStore(backend, { debounceMs = 300, now = () => Date.now() 
   return {
     async load() {
       timelines = await backend.allTimelines();
-      // Numara kimliktir: en büyük numaradan devam edilir, boşluklar doldurulmaz.
-      nextNo = timelines.reduce((max, t) => Math.max(max, t.no), 0) + 1;
-      const saved = await backend.getMeta('nextNo');
-      if (typeof saved === 'number' && saved > nextNo) nextNo = saved;
+      // Diskteki sıra numaraya göre; boşluk varsa burada kapanır ve
+      // düzeltilmiş kayıtlar geri yazılır.
+      renumberVeYaz();
     },
 
     list() { return timelines; },
@@ -79,15 +111,10 @@ export function createStore(backend, { debounceMs = 300, now = () => Date.now() 
 
     createTimeline() {
       const tl = {
-        id: uid(), no: nextNo++, ad: '', entries: [], nextSira: 0,
+        id: uid(), no: timelines.length + 1, ad: '', entries: [], nextSira: 0,
         olusturma: now(), guncelleme: now()
       };
       timelines.push(tl);
-      // createTimeline() eşzamanlı kalıp Timeline nesnesini hemen döndürmeli
-      // (çağıranlar sonucu beklemeden kullanıyor), bu yüzden burada await
-      // edilemez — ama hatası artık sessizce yutulmuyor, reportError ile
-      // onSaved dinleyicilerine bildiriliyor.
-      backend.setMeta('nextNo', nextNo).catch(reportError);
       dirty.add(tl.id);
       schedule();
       return tl;
@@ -96,19 +123,21 @@ export function createStore(backend, { debounceMs = 300, now = () => Date.now() 
     deleteTimeline(id) {
       timelines = timelines.filter(t => t.id !== id);
       dirty.delete(id);
-      // Arayüz void döndürür (eşzamanlı), bu yüzden burada da await edilemez —
+      // Arayüz void döndürür (eşzamanlı), bu yüzden burada await edilemez —
       // hata reportError ile bildiriliyor.
       backend.deleteTimeline(id).catch(reportError);
+      renumberVeYaz();
     },
 
     addEntry(timelineId) {
       const tl = this.get(timelineId);
       if (!tl) throw new Error('addEntry: timeline yok: ' + timelineId);
       const en = {
-        id: uid(), sira: tl.nextSira++, ad: '', metin: '',
+        id: uid(), sira: tl.entries.length, ad: '', metin: '',
         olusturma: now(), guncelleme: now()
       };
       tl.entries.push(en);
+      tl.nextSira = tl.entries.length;
       touch(tl);
       return en;
     },
@@ -117,6 +146,8 @@ export function createStore(backend, { debounceMs = 300, now = () => Date.now() 
       const tl = this.get(timelineId);
       if (!tl) return;
       tl.entries = tl.entries.filter(e => e.id !== entryId);
+      tl.entries.forEach((en, j) => { en.sira = j; });
+      tl.nextSira = tl.entries.length;
       touch(tl);
     },
 

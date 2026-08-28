@@ -68,9 +68,27 @@ export function createTimelineScreen({ root, store, onBack }) {
     metaEl.textContent = n + (n === 1 ? ' ENTRY' : ' ENTRIES');
   }
 
+  /**
+   * Numaralar konumsal olduğu için bir entry silinince kalanların sırası
+   * kayar (ENTRY 2 -> ENTRY 1). Kartlar yeniden çizilmediğinden ekrandaki
+   * etiketler eski kalırdı; her kart kendi entry id'sini taşıyor ve etiket
+   * mağazadaki güncel sıradan yeniden yazılıyor.
+   */
+  function etiketleriTazele() {
+    const tl = store.get(openId);
+    if (!tl) return;
+    scroll.querySelectorAll('.slot[data-entry-id]').forEach(slot => {
+      const en = tl.entries.find(e => e.id === slot.dataset.entryId);
+      if (!en) return;
+      const etiket = slot.querySelector('.enum');
+      if (etiket) etiket.textContent = 'ENTRY ' + en.sira;
+    });
+  }
+
   function entryCard(tl, en) {
     const slot = document.createElement('div');
     slot.className = 'slot';
+    slot.dataset.entryId = en.id;
     const card = document.createElement('div');
     card.className = 'ecard';
     card.innerHTML =
@@ -97,7 +115,10 @@ export function createTimelineScreen({ root, store, onBack }) {
 
     card.querySelector('.edel').addEventListener('click', () => {
       store.deleteEntry(tl.id, en.id);
-      dissolveCard({ slot, card, onDone: meta });
+      // Etiketler hemen tazelenir: silinen kartın dağılma animasyonu ~1 sn
+      // sürüyor, o süre boyunca kalan kartlar yanlış numara göstermemeli.
+      etiketleriTazele();
+      dissolveCard({ slot, card, onDone: () => { meta(); etiketleriTazele(); } });
     });
 
     return slot;

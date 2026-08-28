@@ -57,6 +57,18 @@
   user-select: none; flex: none;
   padding: calc(22px * var(--ui)) calc(26px * var(--ui)) calc(9px * var(--ui)) calc(12px * var(--ui));
   margin: calc(-20px * var(--ui)) calc(-20px * var(--ui)) calc(-7px * var(--ui)) calc(-6px * var(--ui)) }
+/* Kullanıcının yazdığı metnin çevresine beyaz kontur — föyün moru üstünde
+   koyu yazı okunuyordu ama zayıf kalıyordu, kontur onu ayırıyor.
+   -webkit-text-stroke yerine sekiz yöne beyaz text-shadow kullanılıyor:
+   text-stroke konturu glifin İÇİNE doğru çizip harfleri inceltiyor,
+   bu yöntem glifi olduğu gibi bırakıp çevresini sarıyor.
+   Ofsetler bilerek tam 1px — --ui ile ölçeklenirse ara değerler oluşup
+   kontur bulanıklaşır. */
+.ename, .etxt {
+  text-shadow:
+     1px 0 0 #fff, -1px 0 0 #fff, 0 1px 0 #fff, 0 -1px 0 #fff,
+     1px 1px 0 #fff, -1px 1px 0 #fff, 1px -1px 0 #fff, -1px -1px 0 #fff;
+}
 .etxt {
   font: calc(12px * var(--ui))/1.5 var(--font-mono); color: var(--ink-soft); margin-top: calc(7px * var(--ui)); outline: none;
   min-height: calc(16px * var(--ui)); border-top: 1px solid rgba(59,29,122,.22); padding-top: calc(6px * var(--ui));

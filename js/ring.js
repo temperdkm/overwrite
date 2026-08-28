@@ -187,6 +187,34 @@ export function createRingScreen({ root, store, onOpen }) {
   const onResize = () => render();
   window.addEventListener('resize', onResize);
 
+  /* Parmakla kaydırarak çemberi çevirme. Ok butonları duruyor, bu onların
+     yerine değil yanına.
+     EŞİK neden var: föylere dokunmak da bir touchstart/touchend çifti üretiyor.
+     Yatay hareket 40px'i geçmeden ve yataylık dikeyliğin en az 1.5 katı olmadan
+     jest sayılmıyor, böylece föye dokunmak yanlışlıkla çemberi çevirmiyor.
+     Sol kaydırma bir sonrakine geçer (içerik sola gider), sağ kaydırma öncekine. */
+  const ESIK = 40, YATAYLIK = 1.5;
+  let bx = 0, by = 0, izleniyor = false;
+
+  const onTouchStart = (e) => {
+    if (e.touches.length !== 1) { izleniyor = false; return; }
+    bx = e.touches[0].clientX; by = e.touches[0].clientY; izleniyor = true;
+  };
+  const onTouchEnd = (e) => {
+    if (!izleniyor) return;
+    izleniyor = false;
+    const t = e.changedTouches && e.changedTouches[0];
+    if (!t) return;
+    const dx = t.clientX - bx, dy = t.clientY - by;
+    if (Math.abs(dx) < ESIK) return;
+    if (Math.abs(dx) < Math.abs(dy) * YATAYLIK) return;
+    step(dx < 0 ? 1 : -1);
+  };
+
+  root.addEventListener('touchstart', onTouchStart, { passive: true });
+  root.addEventListener('touchend', onTouchEnd, { passive: true });
+  root.addEventListener('touchcancel', () => { izleniyor = false; }, { passive: true });
+
   // Buton kendiliğinden bozulsun. Çember ekranındayken tek buton var,
   // o yüzden aralık 3 sn; ilk açılışta (hiç timeline yokken) 2 sn —
   // kullanıcı ilk bakışta butonun ne olduğunu anlasın diye.
@@ -205,6 +233,8 @@ export function createRingScreen({ root, store, onOpen }) {
     destroy() {
       if (rafId) cancelAnimationFrame(rafId);
       window.removeEventListener('resize', onResize);
+      root.removeEventListener('touchstart', onTouchStart);
+      root.removeEventListener('touchend', onTouchEnd);
       clearInterval(idleTimer);
       clearInterval(firstRunTimer);
     }

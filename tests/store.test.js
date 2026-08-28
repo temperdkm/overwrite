@@ -38,25 +38,27 @@ describe('store', () => {
     expect(store.list()).toHaveLength(1);
   });
 
-  it('SİLİNEN NUMARAYI YENİDEN KULLANMAZ', () => {
+  it('SİLİNCE KALANLAR YENİDEN NUMARALANIR', () => {
     const a = store.createTimeline();  // 1
     const b = store.createTimeline();  // 2
-    store.deleteTimeline(a.id);
+    const c = store.createTimeline();  // 3
+    expect([a.no, b.no, c.no]).toEqual([1, 2, 3]);
     store.deleteTimeline(b.id);
-    expect(store.list()).toHaveLength(0);
-    const c = store.createTimeline();
-    expect(c.no).toBe(3);              // 1'e DÖNMEZ
+    expect(store.list().map(t => t.no)).toEqual([1, 2]);  // III -> II oldu
+    expect(c.no).toBe(2);
+    expect(store.createTimeline().no).toBe(3);            // boşluk kalmaz
   });
 
-  it('entry sırasını da yeniden kullanmaz', () => {
+  it('entry silinince kalanlar yeniden numaralanır', () => {
     const tl = store.createTimeline();
     const e0 = store.addEntry(tl.id);
     const e1 = store.addEntry(tl.id);
-    expect([e0.sira, e1.sira]).toEqual([0, 1]);
-    store.deleteEntry(tl.id, e0.id);
     const e2 = store.addEntry(tl.id);
-    expect(e2.sira).toBe(2);
-    expect(store.get(tl.id).entries.map(e => e.sira)).toEqual([1, 2]);
+    expect([e0.sira, e1.sira, e2.sira]).toEqual([0, 1, 2]);
+    store.deleteEntry(tl.id, e1.id);
+    expect(store.get(tl.id).entries.map(e => e.sira)).toEqual([0, 1]);
+    expect(e2.sira).toBe(1);                              // ENTRY 2 -> ENTRY 1
+    expect(store.addEntry(tl.id).sira).toBe(2);
   });
 
   it('yazmayı geciktirir ve tek seferde yapar', async () => {
@@ -133,7 +135,7 @@ describe('store', () => {
     expect(backend.rows.get(a.id).ad).toBe('A2');   // başarısız olan geri geldi
   });
 
-  it('kaydedilmiş veriyi geri yükler ve sayaçları sürdürür', async () => {
+  it('kaydedilmiş veriyi geri yükler', async () => {
     const tl = store.createTimeline();
     store.addEntry(tl.id);
     await store.flush();
@@ -141,22 +143,27 @@ describe('store', () => {
     const store2 = createStore(backend, { debounceMs: 300, now: () => 2000 });
     await store2.load();
     expect(store2.list()).toHaveLength(1);
-    expect(store2.createTimeline().no).toBe(2);   // 1'i tekrar vermez
+    expect(store2.createTimeline().no).toBe(2);   // konumsal: 1 dolu, sıradaki 2
   });
 
-  it('tüm timeline\'lar silinince nextNo meta değerinden devam eder', async () => {
-    // max-taramadan (0) değil, kalıcı nextNo meta değerinden (3) devam eder —
-    // load()'daki `saved > nextNo` dalını gerçekten çalıştıran tek senaryo.
-    const a = store.createTimeline();  // no 1, nextNo -> 2
-    const b = store.createTimeline();  // no 2, nextNo -> 3
-    await store.flush();
-    store.deleteTimeline(a.id);
-    store.deleteTimeline(b.id);
-    await store.flush();
+  it('ESKİ ŞEMADAN KALAN BOŞLUKLARI yüklemede kapatır', async () => {
+    // Numaraların kalıcı kimlik olduğu önceki sürümde diskte I ve III gibi
+    // boşluklu kayıtlar oluşabiliyordu ve kullanıcının telefonunda böyle veri
+    // var. load() bunları sessizce düzeltip geri yazmalı.
+    backend.rows.set('x', { id: 'x', no: 1, ad: 'A', nextSira: 2, olusturma: 1, guncelleme: 1,
+      entries: [{ id: 'e1', sira: 0, ad: '', metin: '' },
+                { id: 'e2', sira: 2, ad: '', metin: '' }] });
+    backend.rows.set('y', { id: 'y', no: 3, ad: 'B', nextSira: 1, olusturma: 1, guncelleme: 1,
+      entries: [{ id: 'e3', sira: 5, ad: '', metin: '' }] });
 
-    const store2 = createStore(backend, { debounceMs: 300, now: () => 3000 });
+    const store2 = createStore(backend, { debounceMs: 300, now: () => 4000 });
     await store2.load();
-    expect(store2.list()).toHaveLength(0);
-    expect(store2.createTimeline().no).toBe(3);   // 1'e DÖNMEZ
+    expect(store2.list().map(t => t.no)).toEqual([1, 2]);              // III -> II
+    expect(store2.get('x').entries.map(e => e.sira)).toEqual([0, 1]);  // 2 -> 1
+    expect(store2.get('y').entries.map(e => e.sira)).toEqual([0]);     // 5 -> 0
+
+    // Düzeltme diske de yazılır; bir sonraki açılışta tekrar düzeltmeye gerek kalmaz
+    await store2.flush();
+    expect(backend.rows.get('y').no).toBe(2);
   });
 });

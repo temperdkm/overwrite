@@ -61,14 +61,17 @@ Entry
   olusturma / guncelleme
 ```
 
-### Numaralandırma kuralı (onaylandı)
+### Numaralandırma kuralı (28 Ağustos 2026'da değiştirildi)
 
-**Numara kimliktir, sıra değil.** Silinen numara asla yeniden kullanılmaz.
+**Numara konumdur, kimlik değil.** Aradan biri silinince kalanlar kayar ve boşluk kalmaz.
 
-- ENTRY 1 silinirse geriye ENTRY 0 ve ENTRY 2 kalır, araya yeni gelen ENTRY 3 olur
-- Bütün timeline'lar silinse bile yeni gelen VI'dan devam eder, I'e dönmez
+- TIMELINE II silinirse III, II olur; liste her zaman I, II, III diye gider
+- ENTRY 1 silinirse ENTRY 2, ENTRY 1 olur; liste her zaman 0, 1, 2 diye gider
+- Yeni gelen her zaman listenin uzunluğunun bir fazlasını alır
 
-Böylece "Timeline VII" ve "Entry 3" her zaman aynı şeyi ifade eder. Boşluklar beklenen davranıştır, hata değildir.
+**Önceki karar bunun tersiydi** — "numara kimliktir, silinen numara asla geri gelmez", boşluklar beklenen davranıştı. Kullanıcı kullandıktan sonra boşlukların rahatsız edici olduğunu gördü ve kararı değiştirdi. Bunun bedeli: bir entry'ye "3 numaralı not" diye dışarıdan referans verilemez, çünkü numara zamanla değişebilir. Uygulamada böyle bir referans yok.
+
+Numaralandırma her silmede ve **her açılışta** yeniden hesaplanır. Açılışta da hesaplanmasının sebebi: eski şemayla yazılmış, boşluklu kayıtlar diskte durabilir (kullanıcının telefonunda vardı); `load()` bunları sessizce düzeltip geri yazar.
 
 Roma rakamı ve entry sırası sistemindir, kullanıcı değiştiremez. Ad kullanıcınındır, boş bırakılabilir. Arayüzde ikisi her zaman birlikte görünür: `TIMELINE X` + `ALEV ÇUKURU`, `ENTRY 0` + `ÖLÇÜLER`.
 
