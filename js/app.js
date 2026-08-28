@@ -1,8 +1,11 @@
-import { roman } from './roman.js';
+import { makeGlitchButton, fireGlitch, idleGlitch } from './glitch.js';
 
-// Geçici kanarya: font alt kümeleri doğru yüklendi mi?
-// Ş, Ğ, İ harfleri latin-ext içindedir. Diğerlerinden farklı
-// görünüyorlarsa latin-ext dosyası eksiktir.
-document.getElementById('screen-ring').innerHTML =
-  '<div style="font-family:var(--font-pixel);font-size:14px;line-height:2;padding:24px">' +
-  'OVERWRITE<br>' + roman(14) + '<br>ŞİŞLİ GEZİSİ<br>ÇÖĞÜI ı</div>';
+const host = document.getElementById('screen-ring');
+host.style.cssText = 'display:flex;flex-direction:column;gap:22px;align-items:center;justify-content:center';
+
+const ow    = makeGlitchButton({ label: 'OVERWRITE', variant: 'big',    onClick: () => {} });
+const erase = makeGlitchButton({ label: 'ERASE',     variant: 'danger', onClick: () => {} });
+const back  = makeGlitchButton({ label: '◄ GERI',                        onClick: () => {} });
+host.append(ow, erase, back);
+
+idleGlitch(() => [ow, erase, back], 1500);

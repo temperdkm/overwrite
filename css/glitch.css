@@ -1,0 +1,47 @@
+/* Glitch RENK DEĞİŞTİRMEZ. Yalnızca yatay şerit kaymasıdır.
+   Buton 6 kopya halinde üst üste durur; bozulma anında asıl kopya
+   görünmez olur, 5 şerit farklı yönlerde kayar ve aralarındaki
+   ince boşluklar siyah kalır — çerçevedeki kopukluk buradan çıkar. */
+.gb { position: relative; display: inline-block; cursor: pointer; }
+.gb .slice { position: absolute; left: 0; top: 0; opacity: 0; pointer-events: none; }
+.gb .slice.s1 { clip-path: inset(2%  0 84% 0); }
+.gb .slice.s2 { clip-path: inset(18% 0 64% 0); }
+.gb .slice.s3 { clip-path: inset(37% 0 46% 0); }
+.gb .slice.s4 { clip-path: inset(55% 0 27% 0); }
+.gb .slice.s5 { clip-path: inset(74% 0  8% 0); }
+
+@keyframes gb-base { 0%, 96% { opacity: 0 } 100% { opacity: 1 } }
+@keyframes gb-s1 { 0%{opacity:1;transform:translateX(-9px)}18%{transform:translateX(5px)}36%{transform:translateX(-3px)}54%{transform:translateX(11px)}72%{transform:translateX(-6px)}88%{transform:translateX(2px)}100%{opacity:0;transform:translateX(0)} }
+@keyframes gb-s2 { 0%{opacity:1;transform:translateX(7px)}18%{transform:translateX(-11px)}36%{transform:translateX(4px)}54%{transform:translateX(-2px)}72%{transform:translateX(8px)}88%{transform:translateX(-4px)}100%{opacity:0;transform:translateX(0)} }
+@keyframes gb-s3 { 0%{opacity:1;transform:translateX(-4px)}18%{transform:translateX(13px)}36%{transform:translateX(-8px)}54%{transform:translateX(3px)}72%{transform:translateX(-12px)}88%{transform:translateX(5px)}100%{opacity:0;transform:translateX(0)} }
+@keyframes gb-s4 { 0%{opacity:1;transform:translateX(6px)}18%{transform:translateX(-3px)}36%{transform:translateX(10px)}54%{transform:translateX(-8px)}72%{transform:translateX(1px)}88%{transform:translateX(-7px)}100%{opacity:0;transform:translateX(0)} }
+@keyframes gb-s5 { 0%{opacity:1;transform:translateX(-7px)}18%{transform:translateX(8px)}36%{transform:translateX(-2px)}54%{transform:translateX(5px)}72%{transform:translateX(-10px)}88%{transform:translateX(3px)}100%{opacity:0;transform:translateX(0)} }
+
+.gb.fire .base  { animation: gb-base .32s steps(1,end) 1 }
+.gb.fire .s1 { animation: gb-s1 .32s steps(1,end) 1 }
+.gb.fire .s2 { animation: gb-s2 .32s steps(1,end) 1 }
+.gb.fire .s3 { animation: gb-s3 .32s steps(1,end) 1 }
+.gb.fire .s4 { animation: gb-s4 .32s steps(1,end) 1 }
+.gb.fire .s5 { animation: gb-s5 .32s steps(1,end) 1 }
+
+/* Buton yüzeyi: çift mor çerçeve, arada siyah boşluk, saf siyah iç */
+.chip {
+  border: 2px solid var(--vio);
+  background: #000;
+  padding: 2px;
+  box-shadow: 0 0 2px #fff, 0 0 9px var(--vio), 0 0 22px rgba(168,85,247,.6);
+}
+.chip .in {
+  border: 1px solid var(--vio);
+  padding: 6px 9px;
+  font-family: var(--font-pixel);
+  font-size: 9px;
+  letter-spacing: 1px;
+  color: var(--vio-br);
+  text-shadow: 1px 1px 0 var(--bevel), 0 0 8px rgba(228,196,255,.9), 0 0 18px rgba(168,85,247,.8);
+  white-space: nowrap;
+}
+.chip.big { border-width: 3px; padding: 4px; }
+.chip.big .in { border-width: 2px; padding: 11px 4px; font-size: 13px; text-align: center; }
+.chip.danger { border-color: var(--danger); box-shadow: 0 0 2px #fff, 0 0 9px var(--danger), 0 0 22px rgba(240,80,154,.6); }
+.chip.danger .in { border-color: var(--danger); color: var(--danger-text); text-shadow: 1px 1px 0 #7A1140, 0 0 8px rgba(255,180,210,.9); }
