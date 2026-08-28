@@ -89,7 +89,10 @@
 }
 .ecard.born { animation: entry-born .42s steps(1,end) 1 }
 
-.fab { position: absolute; bottom: calc(20px * var(--ui)); left: 50%; transform: translateX(-50%); z-index: 60 }
+/* İki buton yan yana: COMPILE ve +. İkisi de "bu timeline ile bir şey yap"
+   işleri; ERASE tehlikeli olduğu için ayrı köşede, üst barda kalıyor. */
+.fab { position: absolute; bottom: calc(20px * var(--ui)); left: 50%; transform: translateX(-50%);
+       z-index: 60; display: flex; align-items: center; gap: calc(10px * var(--ui)) }
 .fab .chip .in { font-size: calc(12px * var(--ui)); padding: calc(7px * var(--ui)) calc(12px * var(--ui)) }
 
 .saved {
@@ -102,6 +105,9 @@
   16%{transform:translate(-48%,0)}20%{transform:translate(-50%,0)}70%{opacity:1}100%{opacity:0}
 }
 .saved.show { animation: saved-in 1.9s steps(1,end) 1 }
+/* COMPILE bildirimi kaydetme göstergesinden yukarıda dursun; ikisi aynı anda
+   görünebilir ve üst üste binmemeli. */
+.saved.toast { bottom: calc(92px * var(--ui)) }
 
 /* Başarısız yazma: tehlike renginde ve SÖNMEZ — başarı göstergesi gibi
    bir saniyede kaybolursa kullanıcı hatayı hiç görmeyebilir.
