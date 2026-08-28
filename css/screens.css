@@ -65,9 +65,12 @@
    Ofsetler bilerek tam 1px — --ui ile ölçeklenirse ara değerler oluşup
    kontur bulanıklaşır. */
 .ename, .etxt {
+  --kontur: rgba(255,255,255,.5);
   text-shadow:
-     1px 0 0 #fff, -1px 0 0 #fff, 0 1px 0 #fff, 0 -1px 0 #fff,
-     1px 1px 0 #fff, -1px 1px 0 #fff, 1px -1px 0 #fff, -1px -1px 0 #fff;
+     1px 0 0 var(--kontur), -1px 0 0 var(--kontur),
+     0 1px 0 var(--kontur), 0 -1px 0 var(--kontur),
+     1px 1px 0 var(--kontur), -1px 1px 0 var(--kontur),
+     1px -1px 0 var(--kontur), -1px -1px 0 var(--kontur);
 }
 .etxt {
   font: calc(12px * var(--ui))/1.5 var(--font-mono); color: var(--ink-soft); margin-top: calc(7px * var(--ui)); outline: none;

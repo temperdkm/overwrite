@@ -48,5 +48,10 @@
   --sheet-h: calc(114px * var(--ui));
 
   --font-pixel: 'Press Start 2P', monospace;
-  --font-mono: 'Courier New', Courier, monospace;
+  /* Courier New gövde metni için zayıftı: çizgiler ince, harfler basık,
+     telefonda okumak yoruyordu. ui-monospace iOS'ta SF Mono'ya düşer —
+     daha kalın çizgi, daha yüksek harf gövdesi, aynı daktilo karakteri.
+     Hiçbiri indirilmiyor, sistemde zaten var; çevrimdışı çalışma etkilenmez.
+     Courier'a dönmek istersen bu satırı eskisiyle değiştirmek yeter. */
+  --font-mono: ui-monospace, 'SF Mono', SFMono-Regular, Menlo, 'Courier New', monospace;
 }

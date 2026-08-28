@@ -6,6 +6,10 @@
   width: var(--sheet-w); height: var(--sheet-h);
   transition: transform .46s cubic-bezier(.22,.7,.28,1), opacity .46s ease;
 }
+/* Parmakla sürüklerken geçiş kapatılır: açık kalırsa föy parmağı .46s
+   gecikmeyle takip eder ve sürükleme lastik gibi hissettirir. Bırakınca
+   sınıf kalkar ve en yakın föye oturma yine yumuşak olur. */
+.dragging .pos { transition: none }
 .float {
   width: 100%; height: 100%;
   animation: floaty var(--fd, 4.4s) ease-in-out infinite var(--fdl, 0s);

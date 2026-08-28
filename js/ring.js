@@ -35,6 +35,9 @@ export function createRingScreen({ root, store, onOpen }) {
   root.querySelector('#ringNext').addEventListener('click', () => step(1));
 
   let cur = 0;
+  // Parmakla sürükleme sırasındaki kesirli adım kayması. 0 = sürükleme yok.
+  // Pozitif değer sağa sürüklemek demek; föyler sağa kayar.
+  let surukleme = 0;
   let rafId = null;
   const nodes = new Map();   // timeline id -> { pos, float, sheet }
   const paths = new Map();   // timeline id -> <path>
@@ -105,25 +108,14 @@ export function createRingScreen({ root, store, onOpen }) {
       if (fresh) rec = makeNode(tl, i);
       fillSheet(rec.sheet, tl);
 
-      const d = relIndex(i, cur, n);
-      const p = placement(d, center, radii);
-      const tr = `translate(${(p.x - RING.SHEET_W / 2).toFixed(1)}px,` +
-                 `${(p.y - RING.SHEET_H / 2).toFixed(1)}px) scale(${p.scale.toFixed(3)})`;
-
       // Yeni föy geçişsiz olarak yerine konur, sonra geçiş açılır;
       // aksi halde ekranın köşesinden süzülerek gelir.
       if (fresh) {
         rec.pos.style.transition = 'none';
-        rec.pos.style.transform = tr;
-        rec.pos.style.opacity = p.opacity;
+        konumlaFoy(rec, i, n, center, radii);
         void rec.pos.offsetWidth;
         rec.pos.style.transition = '';
-      } else {
-        rec.pos.style.transform = tr;
-        rec.pos.style.opacity = p.opacity;
       }
-      rec.pos.style.zIndex = p.z;
-      rec.pos.style.pointerEvents = p.visible ? 'auto' : 'none';
 
       rec.sheet.onclick = () => {
         const dd = relIndex(i, cur, store.list().length);
@@ -131,19 +123,55 @@ export function createRingScreen({ root, store, onOpen }) {
         else { cur = i; render(); }
       };
 
-      const path = paths.get(tl.id);
-      path.style.display = p.visible ? '' : 'none';
-      path.setAttribute('stroke-width', (1.4 - Math.abs(d) * 0.25).toFixed(2));
-      path.setAttribute('opacity', (p.opacity * 0.75).toFixed(2));
-
       if (tl.id === bornId) {
         rec.sheet.classList.add('born');
         setTimeout(() => rec.sheet.classList.remove('born'), 500);
       }
     });
 
+    konumla();
     const c = store.list()[cur];
     ind.textContent = 'TIMELINE ' + roman(c.no) + (c.ad ? ' · ' + c.ad : '');
+  }
+
+  /**
+   * Tek bir föyün konumunu/ölçeğini/saydamlığını yazar.
+   * surukleme, parmakla sürükleme sırasındaki KESİRLİ adım kaymasıdır;
+   * placement() açıyı hesapladığı için ondalık değerle de sorunsuz çalışır,
+   * böylece föyler adım adım sıçramak yerine parmağı sürekli takip eder.
+   */
+  function konumlaFoy(rec, i, n, center, radii) {
+    const d = relIndex(i, cur, n) - surukleme;
+    const p = placement(d, center, radii);
+    rec.pos.style.transform =
+      `translate(${(p.x - RING.SHEET_W / 2).toFixed(1)}px,` +
+      `${(p.y - RING.SHEET_H / 2).toFixed(1)}px) scale(${p.scale.toFixed(3)})`;
+    rec.pos.style.opacity = p.opacity;
+    rec.pos.style.zIndex = Math.round(p.z);      // kesirli d yüzünden yuvarlanmalı
+    rec.pos.style.pointerEvents = p.visible ? 'auto' : 'none';
+    return { p, d };
+  }
+
+  /**
+   * Yalnızca konumları günceller — föy içeriğini YENİDEN KURMAZ.
+   * Sürükleme sırasında saniyede ~60 kez çağrıldığı için render()'ın
+   * yaptığı innerHTML yeniden kurma işi burada olmamalı.
+   */
+  function konumla() {
+    const list = store.list();
+    const n = list.length;
+    if (!n) return;
+    const { center, radii } = geometry();
+    list.forEach((tl, i) => {
+      const rec = nodes.get(tl.id);
+      if (!rec) return;
+      const { p, d } = konumlaFoy(rec, i, n, center, radii);
+      const path = paths.get(tl.id);
+      if (!path) return;
+      path.style.display = p.visible ? '' : 'none';
+      path.setAttribute('stroke-width', Math.max(0.2, 1.4 - Math.abs(d) * 0.25).toFixed(2));
+      path.setAttribute('opacity', (p.opacity * 0.75).toFixed(2));
+    });
   }
 
   /* İpler föylerin GERÇEK ekran konumunu takip eder; böylece idle
@@ -187,33 +215,65 @@ export function createRingScreen({ root, store, onOpen }) {
   const onResize = () => render();
   window.addEventListener('resize', onResize);
 
-  /* Parmakla kaydırarak çemberi çevirme. Ok butonları duruyor, bu onların
-     yerine değil yanına.
-     EŞİK neden var: föylere dokunmak da bir touchstart/touchend çifti üretiyor.
-     Yatay hareket 40px'i geçmeden ve yataylık dikeyliğin en az 1.5 katı olmadan
-     jest sayılmıyor, böylece föye dokunmak yanlışlıkla çemberi çevirmiyor.
-     Sol kaydırma bir sonrakine geçer (içerik sola gider), sağ kaydırma öncekine. */
-  const ESIK = 40, YATAYLIK = 1.5;
-  let bx = 0, by = 0, izleniyor = false;
+  /* Parmakla SÜRÜKLEME. Ok butonları duruyor, bu onların yerine değil yanına.
+     Çember parmağı sürekli takip eder (adım adım sıçramaz) ve bırakınca en
+     yakın föye oturur. Sağa sürüklemek föyleri sağa götürür — yani soldaki
+     föy öne gelir; bu, içeriği tutup çekmenin doğal yönü.
+     KARAR EŞİĞİ: föye dokunmak da touchstart/touchend üretiyor. İlk 8 piksel
+     boyunca jestin ne olduğuna karar verilmez; hareket dikey ağırlıklıysa
+     sürükleme hiç başlamaz, böylece dokunuşlar çemberi çevirmez. */
+  const KARAR_PX = 8, YATAYLIK = 1.5;
+  const adimMesafesi = () => Math.max(70, (root.clientWidth || 390) * 0.30);
+  let bx = 0, by = 0, izleniyor = false, surukluyor = false, surukledi = false;
 
   const onTouchStart = (e) => {
     if (e.touches.length !== 1) { izleniyor = false; return; }
-    bx = e.touches[0].clientX; by = e.touches[0].clientY; izleniyor = true;
+    bx = e.touches[0].clientX; by = e.touches[0].clientY;
+    izleniyor = true; surukluyor = false;
   };
-  const onTouchEnd = (e) => {
-    if (!izleniyor) return;
+
+  const onTouchMove = (e) => {
+    if (!izleniyor || !e.touches.length) return;
+    const dx = e.touches[0].clientX - bx;
+    const dy = e.touches[0].clientY - by;
+    if (!surukluyor) {
+      if (Math.abs(dx) < KARAR_PX && Math.abs(dy) < KARAR_PX) return;
+      if (Math.abs(dx) < Math.abs(dy) * YATAYLIK) { izleniyor = false; return; }
+      surukluyor = true;
+      root.classList.add('dragging');   // geçişi kapatır, föy parmağa yapışır
+    }
+    surukleme = dx / adimMesafesi();
+    konumla();
+  };
+
+  const bitir = () => {
+    if (!surukluyor) { izleniyor = false; return; }
+    const n = store.list().length;
+    const adim = Math.round(surukleme);
+    surukleme = 0;
+    surukluyor = false;
     izleniyor = false;
-    const t = e.changedTouches && e.changedTouches[0];
-    if (!t) return;
-    const dx = t.clientX - bx, dy = t.clientY - by;
-    if (Math.abs(dx) < ESIK) return;
-    if (Math.abs(dx) < Math.abs(dy) * YATAYLIK) return;
-    step(dx < 0 ? 1 : -1);
+    surukledi = true;                   // bu jestten doğacak click'i yut
+    root.classList.remove('dragging');
+    if (n && adim) cur = ((cur + adim) % n + n) % n;
+    render();
+  };
+
+  // Sürükleme bittiğinde tarayıcı ayrıca bir click üretiyor; föyün üstünde
+  // başlayan bir sürükleme yanlışlıkla timeline'ı açmasın diye yakalama
+  // aşamasında durduruluyor.
+  const onClickCapture = (e) => {
+    if (!surukledi) return;
+    surukledi = false;
+    e.stopPropagation();
+    e.preventDefault();
   };
 
   root.addEventListener('touchstart', onTouchStart, { passive: true });
-  root.addEventListener('touchend', onTouchEnd, { passive: true });
-  root.addEventListener('touchcancel', () => { izleniyor = false; }, { passive: true });
+  root.addEventListener('touchmove', onTouchMove, { passive: true });
+  root.addEventListener('touchend', bitir, { passive: true });
+  root.addEventListener('touchcancel', bitir, { passive: true });
+  root.addEventListener('click', onClickCapture, true);
 
   // Buton kendiliğinden bozulsun. Çember ekranındayken tek buton var,
   // o yüzden aralık 3 sn; ilk açılışta (hiç timeline yokken) 2 sn —
@@ -234,7 +294,10 @@ export function createRingScreen({ root, store, onOpen }) {
       if (rafId) cancelAnimationFrame(rafId);
       window.removeEventListener('resize', onResize);
       root.removeEventListener('touchstart', onTouchStart);
-      root.removeEventListener('touchend', onTouchEnd);
+      root.removeEventListener('touchmove', onTouchMove);
+      root.removeEventListener('touchend', bitir);
+      root.removeEventListener('touchcancel', bitir);
+      root.removeEventListener('click', onClickCapture, true);
       clearInterval(idleTimer);
       clearInterval(firstRunTimer);
     }
