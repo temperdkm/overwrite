@@ -18,6 +18,12 @@ const JITTER_FACTOR = [1, -0.85, 1.35, -1.1, 0.75];
 
 export const PIXEL_SIZE = 8;
 
+/* Bu ikisi css/dissolve.css ile EŞLEŞMELİ:
+   PIKSEL_SURE_MS  -> .px.go animasyon süresi (.16s)
+   IZGARA_BASLANGIC_MS -> pençe+glitch evresinin bittiği, ızgaranın göründüğü an */
+const PIKSEL_SURE_MS = 160;
+const IZGARA_BASLANGIC_MS = 340;
+
 const LINES = SLASHES.map(s => {
   const pts = [];
   for (let k = 0; k <= STEPS; k++) {
@@ -93,8 +99,10 @@ export function dissolveCard({ slot, card, onDone }) {
       d.style.height = ch.toFixed(2) + 'px';
       d.style.backgroundSize = w + 'px ' + h + 'px';
       d.style.backgroundPosition = (-c * cw).toFixed(2) + 'px ' + (-r * ch).toFixed(2) + 'px';
-      // alt sıra önce gider: kart aşağıdan yukarı erir
-      d.dataset.delay = ((rows - 1 - r) * 11 + Math.random() * 120).toFixed(0);
+      // Alt sıra önce gider: kart aşağıdan yukarı erir.
+      // Yayılma sıkılaştırıldı (satır 11->7 ms, rastgelelik 120->60 ms):
+      // eskiden son kare ~220 ms sonra başlıyordu ve dağılma sürünüyordu.
+      d.dataset.delay = ((rows - 1 - r) * 7 + Math.random() * 60).toFixed(0);
       grid.appendChild(d);
     }
   }
@@ -111,15 +119,23 @@ export function dissolveCard({ slot, card, onDone }) {
       px.style.animationDelay = px.dataset.delay + 'ms';
       px.classList.add('go');
     });
-  }, 340);
+  }, IZGARA_BASLANGIC_MS);
+
+  /* Kapanış zamanlaması ızgaradan HESAPLANIR, sabit yazılmaz.
+     Kaç sıra oluştuğu kartın yüksekliğine ve --ui ölçeğine bağlı; sabit bir
+     sayı yazılırsa uzun bir kartta kareler daha sönmeden slot kapanır, kısa
+     bir kartta da söndükten sonra boşuna beklenir. */
+  const gecikmeler = [...grid.children].map(el => +el.dataset.delay || 0);
+  const enGecGecikme = gecikmeler.length ? Math.max(...gecikmeler) : 0;
+  const pikselBitis = IZGARA_BASLANGIC_MS + enGecGecikme + PIKSEL_SURE_MS;
 
   setTimeout(() => {
-    slot.style.transition = 'height .24s ease, margin .24s';
+    slot.style.transition = 'height .2s ease, margin .2s';
     slot.style.height = '0';
     slot.style.marginBottom = '0';
-  }, 740);
+  }, pikselBitis);
 
-  setTimeout(() => { slot.remove(); if (onDone) onDone(); }, 1000);
+  setTimeout(() => { slot.remove(); if (onDone) onDone(); }, pikselBitis + 220);
 }
 
 /**

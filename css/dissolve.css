@@ -36,10 +36,14 @@
   position: absolute; background-image: var(--cardbg); background-repeat: no-repeat;
   box-shadow: 0 0 4px rgba(199,125,255,.6);
 }
+/* Buharlaşma: kısa yol, erken sönme.
+   Önceki hâli 30px yükselip .26s süzülüyordu — telefonda "havaya kalkma"
+   gibi duruyordu, buharlaşma gibi değil. Şimdi yol 14px'e, süre .16s'ye
+   indi ve saydamlık erken düşüyor; kare gözden yükselmeden önce sönüyor.
+   Parlama da kısıldı: büyük bir patlama "pop" hissi veriyordu. */
 @keyframes px-pop {
-  0%   { opacity: 1;   transform: translateY(0) scale(1);      filter: brightness(1) }
-  30%  { opacity: 1;   transform: translateY(-3px) scale(1.22); filter: brightness(1.9) }
-  60%  { opacity: .75; transform: translateY(-11px) scale(.92); filter: brightness(1.3) }
-  100% { opacity: 0;   transform: translateY(-30px) scale(.35); filter: brightness(1) }
+  0%   { opacity: 1;   transform: translateY(0) scale(1);       filter: brightness(1.3) }
+  40%  { opacity: .65; transform: translateY(-5px) scale(.78);  filter: brightness(1.1) }
+  100% { opacity: 0;   transform: translateY(-14px) scale(.22); filter: brightness(1) }
 }
-.px.go { animation: px-pop .26s cubic-bezier(.3,.1,.6,1) forwards }
+.px.go { animation: px-pop .16s cubic-bezier(.4,0,.75,1) forwards }
