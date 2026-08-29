@@ -2,7 +2,6 @@ import { roman } from './roman.js';
 import { bindEditable, setText } from './editable.js';
 import { makeGlitchButton, idleGlitch } from './glitch.js';
 import { dissolveCard, dissolveAll } from './dissolve.js';
-import { timelinePaylas } from './compile.js';
 
 export function createTimelineScreen({ root, store, onBack }) {
   root.innerHTML =
@@ -15,8 +14,7 @@ export function createTimelineScreen({ root, store, onBack }) {
     '</div>' +
     '<div class="entry-scroll" id="tlScroll"></div>' +
     '<div class="saved" id="tlSaved">&#9622; KAYDEDİLDİ</div>' +
-    '<div class="saved toast" id="tlToast"></div>' +
-    '<div class="fab"><span id="tlCompile"></span><span id="tlAdd"></span></div>';
+    '<div class="fab" id="tlAdd"></div>';
 
   const kicker = root.querySelector('#tlKicker');
   const nameEl = root.querySelector('#tlName');
@@ -31,38 +29,11 @@ export function createTimelineScreen({ root, store, onBack }) {
   const addBtn   = makeGlitchButton({ label: '+', onClick: () => addEntry() });
   root.querySelector('#tlBack').appendChild(backBtn);
   root.querySelector('#tlErase').appendChild(eraseBtn);
-  const compileBtn = makeGlitchButton({ label: 'COMPILE', onClick: () => derle() });
-  root.querySelector('#tlCompile').appendChild(compileBtn);
   root.querySelector('#tlAdd').appendChild(addBtn);
-
-  const toastEl = root.querySelector('#tlToast');
-  function toast(mesaj) {
-    toastEl.textContent = mesaj;
-    toastEl.classList.remove('show');
-    void toastEl.offsetWidth;
-    toastEl.classList.add('show');
-  }
-
-  /* Timeline'ı telefondan dışarı verir.
-     Metin bellekteki modelden üretiliyor (diske yazılmayı beklemeye gerek yok —
-     düzenlemeler anında bellekte, gecikme yalnızca diske yazmada). */
-  async function derle() {
-    const tl = store.get(openId);
-    if (!tl) return;
-    try {
-      const sonuc = await timelinePaylas(tl);
-      // Dosya/metin paylaşımında geri bildirimi iOS'un kendi menüsü veriyor;
-      // panoya düşüldüyse kullanıcı hiçbir şey görmez, o yüzden söylüyoruz.
-      if (sonuc === 'pano') toast('▚ PANOYA KOPYALANDI');
-    } catch (err) {
-      toast('▚ PAYLAŞILAMADI');
-      console.error('COMPILE:', err);
-    }
-  }
 
   // Butonlar kendiliğinden, sırayla bozulur. Ekran gizliyken durur.
   const idleTimer = idleGlitch(
-    () => (root.hasAttribute('hidden') ? [] : [backBtn, eraseBtn, addBtn, compileBtn]),
+    () => (root.hasAttribute('hidden') ? [] : [backBtn, eraseBtn, addBtn]),
     3000
   );
 
