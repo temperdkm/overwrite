@@ -12,60 +12,43 @@ import { fireGlitch } from './glitch.js';
    şeritlere bölünüp kayabilirdi. Ayrıca birkaç kilobayt tutuyor, her ekran
    boyutunda net kalıyor ve çevrimdışı çalışmayı etkilemiyor. */
 
-/* RUH KIRIK, İKİYE BÖLÜNMÜŞ DEĞİL.
-   İlk hâlde iki yarım düz bir çizgiyle ayrılıyordu ve ruh "ortadan kesilmiş"
-   gibi duruyordu. Ayrım artık TESTERE DİŞLİ: iki yarımın kenarları birbirine
-   geçen kırık bir hat izliyor.
+/* RUH TEK BİR KIRIKLA İKİYE AYRILMIŞ.
+   Ayrım düz bir çizgi değil TESTERE DİŞLİ: iki yarımın kenarları birbirine
+   geçen kırık bir hat izliyor. Ama araları AÇIK DEĞİL — kırık tam oturuyor.
 
-   Aynı kırık hattın iki kopyası var — biri 0.3 birim solda, biri 0.3 birim
-   sağda. Aradaki ince boşluk çatlağın kendisi; altında duran koyu dolgu
-   oradan görünüyor, böylece çatlağın derinliği oluyor. Uçlar (üstteki çentik
-   ve alttaki sivri uç) KAYDIRILMIYOR: çatlak iki uçta kapanıp ortada
-   açılıyor, gerçek bir kırık gibi.
+   Bunu boşluksuz yapmanın yolu iki yarımı yan yana koymak değil: iki dolgu
+   yan yana geldiğinde kenar yumuşatma yüzünden aralarında saç teli inceliğinde
+   bir çizgi kalır. Onun yerine önce BÜTÜN kalp kırmızı çiziliyor, üstüne
+   yalnızca sağ yarım moruyla basılıyor. Böylece sınır tek bir şeklin kenarı
+   oluyor ve dikiş izi hiç oluşmuyor.
 
-   İki yarım ayrı yol olarak çiziliyor; tek yolu clipPath ile bölmek id
-   gerektirir ve ruh 6 kopya halinde çizildiği için (glitch şeritleri) aynı
-   id sayfada 6 kez tekrarlanır, tarayıcı hepsini ilkine bağlardı. */
+   (Daha önce iki yarımın çatlak hattı 0.3 birim ayrılıp aradan koyu bir dolgu
+   gösteriliyordu; kullanıcı çatlağın tam birleşmesini istedi. Yarımların
+   üstündeki ikincil çatlaklar da kaldırıldı — yalnızca ortadaki kırık kaldı.)
 
-// Sol yarımın sağ kenarı (çatlağın sol dudağı)
-const CATLAK_SOL = 'L10.1 8.2 L12.9 10.6 L9.9 13.4 L12.7 16.2 L10.9 18.4 L12 21';
-// Sağ yarımın sol kenarı (çatlağın sağ dudağı)
-const CATLAK_SAG = 'L10.7 8.2 L13.5 10.6 L10.5 13.4 L13.3 16.2 L11.5 18.4 L12 21';
+   Yol tek parça olarak çiziliyor; clipPath ile bölmek id gerektirir ve ruh
+   6 kopya halinde çizildiği için (glitch şeritleri) aynı id sayfada 6 kez
+   tekrarlanır, tarayıcı hepsini ilkine bağlardı. */
 
-// Kalbin dış hatları — uçtan çentiğe doğru, yani ters yönde çiziliyor;
-// çatlak yukarıdan aşağı gittiği için kapanan yol böyle tamamlanıyor.
-const DIS_SOL = 'C 12 21, 2 14.5, 2 8.5 C 2 5.4, 4.4 3, 7.5 3 C 9.5 3, 11.2 4.1, 12 5.7 Z';
-const DIS_SAG = 'C 12 21, 22 14.5, 22 8.5 C 22 5.4, 19.6 3, 16.5 3 C 14.5 3, 12.8 4.1, 12 5.7 Z';
+// Kırığın hattı: çentikten (12, 5.7) alttaki sivri uca (12, 21).
+const KIRIK = 'L10.4 8.2 L13.2 10.6 L10.2 13.4 L13 16.2 L11.2 18.4 L12 21';
 
-const SOL = 'M12 5.7 ' + CATLAK_SOL + ' ' + DIS_SOL;
-const SAG = 'M12 5.7 ' + CATLAK_SAG + ' ' + DIS_SAG;
+// Bütün kalp — alt katman.
+const TAM =
+  'M12 5.7 C 11.2 4.1, 9.5 3, 7.5 3 C 4.4 3, 2 5.4, 2 8.5 C 2 14.5, 12 21, 12 21 ' +
+  'C 12 21, 22 14.5, 22 8.5 C 22 5.4, 19.6 3, 16.5 3 C 14.5 3, 12.8 4.1, 12 5.7 Z';
 
-/* Çatlağın içi: iki dudağın arasında kalan şerit. Sağ dudak aşağı, sol dudak
-   yukarı doğru çizilip kapatılıyor. Yarımların ALTINDA durduğu için yalnızca
-   aradaki boşluktan görünür. */
-const CATLAK_ICI =
-  'M12 5.7 L10.7 8.2 L13.5 10.6 L10.5 13.4 L13.3 16.2 L11.5 18.4 L12 21 ' +
-  'L10.9 18.4 L12.7 16.2 L9.9 13.4 L12.9 10.6 L10.1 8.2 Z';
+/* Sağ yarım: çentikten kırık boyunca aşağı, sonra sağ dış hattan geri yukarı.
+   Dış hat uçtan çentiğe doğru, yani ters yönde çiziliyor. */
+const SAG =
+  'M12 5.7 ' + KIRIK + ' ' +
+  'C 12 21, 22 14.5, 22 8.5 C 22 5.4, 19.6 3, 16.5 3 C 14.5 3, 12.8 4.1, 12 5.7 Z';
 
 function ruhSvg() {
   return '' +
     '<svg class="soul-svg" viewBox="0 0 24 24" aria-hidden="true">' +
-      '<path d="' + CATLAK_ICI + '" fill="#3D0A18"/>' +
-      '<path d="' + SOL + '" fill="#E0392F"/>' +
+      '<path d="' + TAM + '" fill="#E0392F"/>' +
       '<path d="' + SAG + '" fill="#7B3FD4"/>' +
-
-      /* İkincil çatlaklar — ruh yalnızca ikiye ayrılmamış, çatlamış.
-         Kendi renklerinin koyusu, siyah değil.
-
-         BİLEREK ASİMETRİK. İlk hâlde iki yarımda aynı yükseklikte, birbirinin
-         AYNASI iki çatlak vardı; alttaki bağ ipi de baştan aşağı bombeli bir
-         yaydı. Üçü birleşince ruhun üstünde iki göz ve bir ağız beliriyordu —
-         kalp gülüyor gibi duruyordu. Simetrik işaret çifti + altında yatay yay,
-         insanın yüz olarak okuduğu şeyin ta kendisi. Artık sol yarımda iki,
-         sağ yarımda bir çatlak var ve hiçbiri diğerinin karşısında değil. */
-      '<path d="M6.2 6.8 L8.4 8.6 L7.1 11.2" stroke="#8E1B18" stroke-width=".55" fill="none" stroke-linejoin="round"/>' +
-      '<path d="M5.4 13.4 L7.1 14.2" stroke="#8E1B18" stroke-width=".45" fill="none"/>' +
-      '<path d="M17.9 11.2 L16.1 13.1 L17.3 15.7" stroke="#4A1F86" stroke-width=".55" fill="none" stroke-linejoin="round"/>' +
 
       /* ERROR'UN BAĞI — çapraz kesişen ipler.
          Kullanıcı istediği bağlanma biçimini çizerek gösterdi: ipler kalbi
@@ -73,8 +56,9 @@ function ruhSvg() {
          alt uca iniyor. Uçlar siluetin BİRAZ DIŞINDA bitiyor — ip arkadan
          dolanıyormuş gibi dursun diye.
 
-         Hepsi ÇAPRAZ: alt yarıda baştan aşağı yatay bir yay yok, çünkü öyle
-         bir yay ağza dönüşüyor. NEON YOK: ipin kendi rengi. */
+         Hepsi ÇAPRAZ. Alt yarıda baştan aşağı yatay bir yay YOK: bir yay ve
+         üstünde simetrik iki işaret olunca ruhun üstünde gülen bir yüz
+         beliriyordu. NEON YOK: ipin kendi rengi. */
       '<g stroke="#2FA8E8" stroke-width=".68" fill="none" stroke-linecap="round" opacity=".95">' +
         '<path d="M4.4 3.4 C 7.5 9, 11 15, 14.6 20.6"/>' +
         '<path d="M19 3.1 C 16.5 9, 12 15.2, 7.8 18.6"/>' +
