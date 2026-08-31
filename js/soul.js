@@ -54,27 +54,34 @@ function ruhSvg() {
       '<path d="' + SOL + '" fill="#E0392F"/>' +
       '<path d="' + SAG + '" fill="#7B3FD4"/>' +
 
-      /* Yarımların üstündeki ikincil çatlaklar — ruh yalnızca ikiye
-         ayrılmamış, çatlamış. Kendi renklerinin koyusu, siyah değil. */
-      '<path d="M6.4 7.4 L8.2 9.1 L6.9 11.3" stroke="#8E1B18" stroke-width=".55" fill="none" stroke-linejoin="round"/>' +
-      '<path d="M7.9 14.4 L9.6 15.6" stroke="#8E1B18" stroke-width=".45" fill="none"/>' +
-      '<path d="M17.4 7.9 L15.7 9.4 L17.1 11.6" stroke="#4A1F86" stroke-width=".55" fill="none" stroke-linejoin="round"/>' +
-      '<path d="M16.2 14.6 L14.5 15.7" stroke="#4A1F86" stroke-width=".45" fill="none"/>' +
+      /* İkincil çatlaklar — ruh yalnızca ikiye ayrılmamış, çatlamış.
+         Kendi renklerinin koyusu, siyah değil.
+
+         BİLEREK ASİMETRİK. İlk hâlde iki yarımda aynı yükseklikte, birbirinin
+         AYNASI iki çatlak vardı; alttaki bağ ipi de baştan aşağı bombeli bir
+         yaydı. Üçü birleşince ruhun üstünde iki göz ve bir ağız beliriyordu —
+         kalp gülüyor gibi duruyordu. Simetrik işaret çifti + altında yatay yay,
+         insanın yüz olarak okuduğu şeyin ta kendisi. Artık sol yarımda iki,
+         sağ yarımda bir çatlak var ve hiçbiri diğerinin karşısında değil. */
+      '<path d="M6.2 6.8 L8.4 8.6 L7.1 11.2" stroke="#8E1B18" stroke-width=".55" fill="none" stroke-linejoin="round"/>' +
+      '<path d="M5.4 13.4 L7.1 14.2" stroke="#8E1B18" stroke-width=".45" fill="none"/>' +
+      '<path d="M17.9 11.2 L16.1 13.1 L17.3 15.7" stroke="#4A1F86" stroke-width=".55" fill="none" stroke-linejoin="round"/>' +
 
       /* ERROR'UN BAĞI — çapraz kesişen ipler.
-         Önce yatay kuşaklar denendi, kullanıcı istediği bağlanma biçimini
-         çizerek gösterdi: ipler kalbi enlemesine sarmıyor, iki üst lobun
-         tepesinden başlayıp ortada kesişerek alt uca doğru iniyor, aralarına
-         da yanlardan geçen iki ip giriyor. Uçlar siluetin BİRAZ DIŞINDA
-         bitiyor — ip arkadan dolanıyormuş gibi dursun diye.
-         NEON YOK: ipin kendi rengi, ışıma eklenmiyor. */
+         Kullanıcı istediği bağlanma biçimini çizerek gösterdi: ipler kalbi
+         enlemesine sarmıyor, üst lobların tepesinden başlayıp ortada kesişerek
+         alt uca iniyor. Uçlar siluetin BİRAZ DIŞINDA bitiyor — ip arkadan
+         dolanıyormuş gibi dursun diye.
+
+         Hepsi ÇAPRAZ: alt yarıda baştan aşağı yatay bir yay yok, çünkü öyle
+         bir yay ağza dönüşüyor. NEON YOK: ipin kendi rengi. */
       '<g stroke="#2FA8E8" stroke-width=".68" fill="none" stroke-linecap="round" opacity=".95">' +
-        '<path d="M4.4 3.4 C 7 9, 11 15, 14.6 20.6"/>' +
+        '<path d="M4.4 3.4 C 7.5 9, 11 15, 14.6 20.6"/>' +
         '<path d="M19 3.1 C 16.5 9, 12 15.2, 7.8 18.6"/>' +
-        '<path d="M3.6 14.6 C 8 11.3, 16 12.6, 20.1 14.4"/>' +
-        '<path d="M2.4 10.2 C 8 15.2, 15.2 16.2, 20.9 11.1"/>' +
-        '<path d="M9.4 3.3 C 12.2 9, 12.6 15, 12.2 21"/>' +
-        '<path d="M6.1 16.4 C 9 18.7, 13.2 19.2, 16.7 16.7"/>' +
+        '<path d="M2.5 9.4 C 7 13, 14 16.4, 19.8 15.2"/>' +
+        '<path d="M3.4 14.8 C 9 11.6, 15.6 8.6, 20.8 10.4"/>' +
+        '<path d="M9.4 3.3 C 12.4 9, 12.8 15, 12.2 21"/>' +
+        '<path d="M15.4 3.6 C 15 8, 13.4 13, 8.9 18.4"/>' +
       '</g>' +
     '</svg>';
 }
