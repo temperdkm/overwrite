@@ -154,8 +154,16 @@ export function dissolveCard({ slot, card, onDone }) {
  * - aynı anda en fazla 3 kart dağılır
  * Ölçüldü: bu iki kural olmadan 20 entry'de zirve 4325 eleman,
  * kurallarla 1363.
+ *
+ * kartSecici ZORUNLU ve varsayılanı YOK. Eskiden '.ecard' sabit yazılıydı;
+ * Doodle Sphere'in konuşma balonları '.bubble' olduğu için kart null geliyor,
+ * dissolveCard ilk ölçümde hata fırlatıyordu. Sonuç en kötüsüydü: evren
+ * mağazadan çoktan silinmiş oluyor ama ekran hiç kapanmıyordu. Varsayılan
+ * bırakmak aynı tuzağı üçüncü ekranda tekrar kurardı.
  */
-export function dissolveAll({ scroll, onEach, onDone }) {
+export function dissolveAll({ scroll, kartSecici, onEach, onDone }) {
+  if (!kartSecici) throw new Error('dissolveAll: kartSecici zorunlu');
+
   const all = [...scroll.querySelectorAll('.slot:not([data-dissolving])')];
   const box = scroll.getBoundingClientRect();
   const visible = all.filter(s => {
@@ -171,23 +179,37 @@ export function dissolveAll({ scroll, onEach, onDone }) {
   const MAX_CONCURRENT = 3, GAP = 150;
   let index = 0, active = 0, finished = 0;
 
+  /* Emniyet kemeri EN BAŞTA kuruluyor, döngüden sonra değil: aşağıdaki
+     çağrılardan biri hata fırlatırsa kemer hiç bağlanmamış oluyordu ve
+     ekran sonsuza dek açık kalıyordu — yani tam da koruması gereken durumda
+     çalışmıyordu. */
+  setTimeout(onDone, visible.length * GAP + 2200);
+
   (function next() {
     if (index >= visible.length) return;
     if (active >= MAX_CONCURRENT) { setTimeout(next, 70); return; }
     const slot = visible[index++];
+    const card = slot.querySelector(kartSecici);
     active++;
-    dissolveCard({
-      slot,
-      card: slot.querySelector('.ecard'),
-      onDone: () => {
-        active--; finished++;
-        if (onEach) onEach(slot);
-        if (finished === visible.length) setTimeout(onDone, 140);
-      }
-    });
+    // Tek bir bozuk kart bütün zinciri durdurmasın: o slot sessizce kalkar,
+    // kalanlar dağılmaya devam eder.
+    try {
+      if (!card) throw new Error('kart bulunamadı: ' + kartSecici);
+      dissolveCard({
+        slot,
+        card,
+        onDone: () => {
+          active--; finished++;
+          if (onEach) onEach(slot);
+          if (finished === visible.length) setTimeout(onDone, 140);
+        }
+      });
+    } catch (err) {
+      console.error('dağılma atlandı:', err);
+      active--; finished++;
+      slot.remove();
+      if (finished === visible.length) setTimeout(onDone, 140);
+    }
     setTimeout(next, GAP);
   })();
-
-  // emniyet kemeri: bir dağılma takılırsa ekran yine de kapansın
-  setTimeout(onDone, visible.length * GAP + 2200);
 }

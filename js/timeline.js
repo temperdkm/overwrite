@@ -159,7 +159,7 @@ export function createTimelineScreen({ root, store, onBack }) {
       closed = true;
       onBack();
     };
-    dissolveAll({ scroll, onDone: close });
+    dissolveAll({ scroll, kartSecici: '.ecard', onDone: close });
   }
 
   return {

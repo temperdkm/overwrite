@@ -4,6 +4,7 @@ import { createUniverseStore } from './universes.js';
 import { createRingScreen } from './ring.js';
 import { createTimelineScreen } from './timeline.js';
 import { createSphereScreen } from './sphere.js';
+import { createUniverseScreen } from './universe.js';
 import { requestPersistence, isStandalone } from './platform.js';
 
 const store = createStore(timelineBackend);
@@ -11,37 +12,50 @@ const evrenler = createUniverseStore();   // Doodle Sphere'in adaları
 const ringRoot = document.getElementById('screen-ring');
 const tlRoot   = document.getElementById('screen-timeline');
 const sphRoot  = document.getElementById('screen-sphere');
+const uvRoot   = document.getElementById('screen-universe');
 
-let ring, timeline, sphere;
+/* Ekranlar tek listeden yönetiliyor. Eskiden her göster-fonksiyonu diğer
+   ekranları TEK TEK gizliyordu; dördüncü ekran eklenince o kalıpta birini
+   unutmak iki ekranın üst üste binmesi demekti. */
+const ekranlar = [ringRoot, tlRoot, sphRoot, uvRoot];
+
+function goster(hedef) {
+  ekranlar.forEach(e => {
+    if (e === hedef) e.removeAttribute('hidden');
+    else e.setAttribute('hidden', '');
+  });
+}
+
+let ring, timeline, sphere, universe;
 let acildi = false;      // boot() sonuna kadar geldi mi
 let panelGosterildi = false;
 
 function showRing() {
-  tlRoot.setAttribute('hidden', '');
-  sphRoot.setAttribute('hidden', '');
-  ringRoot.removeAttribute('hidden');
+  goster(ringRoot);
   ring.render();
 }
 
 function showTimeline(id) {
-  ringRoot.setAttribute('hidden', '');
-  sphRoot.setAttribute('hidden', '');
-  tlRoot.removeAttribute('hidden');
+  goster(tlRoot);
   timeline.open(id);
 }
 
 /* Hedeflerin dünyası. Ekranın üstünden sarkan ruhla girilip yine onunla
    çıkılıyor; iki evren arasında tek geçiş noktası var. */
 function showSphere() {
-  ringRoot.setAttribute('hidden', '');
-  tlRoot.setAttribute('hidden', '');
-  sphRoot.removeAttribute('hidden');
+  goster(sphRoot);
   sphere.render();
+}
+
+/* Bir adanın kapısından içeri: o hedefin notları ve Ink!Sans. */
+function showUniverse(id) {
+  goster(uvRoot);
+  universe.open(id);
 }
 
 /**
  * Açılış başarısız olursa GÖRÜNÜR bir hata paneli çizer.
- * index.html iki boş <section> ile geliyor: panel olmazsa kullanıcı sadece
+ * index.html boş <section>'larla geliyor: panel olmazsa kullanıcı sadece
  * koyu degradeyi görür ve "yükleniyor" ile "bozuldu" ayırt edilemez.
  * Hata metni innerHTML ile DEĞİL, textContent ile yazılır.
  */
@@ -54,10 +68,9 @@ function acilisBasarisiz(err) {
   try { if (ring) ring.destroy(); } catch (e) { /* yoksay */ }
   try { if (timeline) timeline.destroy(); } catch (e) { /* yoksay */ }
   try { if (sphere) sphere.destroy(); } catch (e) { /* yoksay */ }
+  try { if (universe) universe.destroy(); } catch (e) { /* yoksay */ }
 
-  tlRoot.setAttribute('hidden', '');
-  sphRoot.setAttribute('hidden', '');
-  ringRoot.removeAttribute('hidden');
+  goster(ringRoot);
   ringRoot.style.pointerEvents = '';   // yükleme kilidi kalkmalı ki butona basılabilsin
   ringRoot.textContent = '';           // innerHTML KULLANILMAZ
 
@@ -114,7 +127,8 @@ async function boot() {
   ringRoot.style.pointerEvents = '';
   if (bosSatir) bosSatir.style.display = '';
   timeline = createTimelineScreen({ root: tlRoot, store, onBack: showRing });
-  sphere = createSphereScreen({ root: sphRoot, evrenler, onBack: showRing });
+  sphere = createSphereScreen({ root: sphRoot, evrenler, onBack: showRing, onOpen: showUniverse });
+  universe = createUniverseScreen({ root: uvRoot, evrenler, onBack: showSphere });
   ring.render();
   acildi = true;
 

@@ -32,9 +32,14 @@
 
 /* will-change YOK: binlerce kareye ayrı grafik katmanı ayırtmak
    telefonu kasan asıl sebep. Ölçüldü: 4325 elemandan 1363'e düşüş. */
+/* Doku ve parıltı DEĞİŞKENDEN geliyor: aynı dağılma animasyonu hem mor
+   föylerde hem Doodle Sphere'in koyu konuşma balonlarında kullanılıyor,
+   sabit yazılsaydı balonlar mor piksellere dönüşürdü. Değişken verilmezse
+   eski davranış aynen sürüyor. */
 .px {
-  position: absolute; background-image: var(--cardbg); background-repeat: no-repeat;
-  box-shadow: 0 0 4px rgba(199,125,255,.6);
+  position: absolute; background-image: var(--px-doku, var(--cardbg));
+  background-repeat: no-repeat;
+  box-shadow: 0 0 4px var(--px-isik, rgba(199,125,255,.6));
 }
 /* Buharlaşma: kısa yol, erken sönme.
    Önceki hâli 30px yükselip .26s süzülüyordu — telefonda "havaya kalkma"
