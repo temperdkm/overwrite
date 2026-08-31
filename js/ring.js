@@ -1,10 +1,11 @@
 import { roman } from './roman.js';
 import { RING, relIndex, placement, edgePoint } from './ring-math.js';
 import { makeGlitchButton, fireGlitch, idleGlitch } from './glitch.js';
+import { makeSoul } from './soul.js';
 
 const SVG_NS = 'http://www.w3.org/2000/svg';
 
-export function createRingScreen({ root, store, onOpen }) {
+export function createRingScreen({ root, store, onOpen, onSphere }) {
   root.innerHTML =
     '<div class="ring-head" id="ringHead">DATA COMPILATION</div>' +
     '<svg id="wires" preserveAspectRatio="none"></svg>' +
@@ -212,6 +213,10 @@ export function createRingScreen({ root, store, onOpen }) {
     render();
   }
 
+  /* Doodle Sphere'e geçiş: ekranın üstünden sarkan ruh. */
+  const soul = onSphere ? makeSoul({ label: 'DOODLE SPHERE', onTap: onSphere }) : null;
+  if (soul) root.appendChild(soul.el);
+
   const onResize = () => render();
   window.addEventListener('resize', onResize);
 
@@ -300,6 +305,7 @@ export function createRingScreen({ root, store, onOpen }) {
       root.removeEventListener('click', onClickCapture, true);
       clearInterval(idleTimer);
       clearInterval(firstRunTimer);
+      if (soul) soul.destroy();
     }
   };
 }

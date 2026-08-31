@@ -1,0 +1,59 @@
+/* Ekranın üstünden sarkan ruh — iki dünya arasındaki geçiş.
+   İp ve ruh TEK bir öğe olarak, ipin tavana bağlandığı noktadan sallanır
+   (transform-origin: 50% 0). İkisi ayrı sallansaydı ruh ipten kopardı. */
+
+.soul-hang {
+  position: absolute;
+  top: 0;
+  right: calc(16px * var(--ui));
+  z-index: 70;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  transform-origin: 50% 0;
+  animation: soul-swing 6.5s ease-in-out infinite;
+  pointer-events: none;          /* yalnızca ruhun kendisi tıklanabilir */
+}
+
+@keyframes soul-swing {
+  0%, 100% { transform: rotate(-3.2deg) }
+  50%      { transform: rotate(3.2deg) }
+}
+
+.soul-string {
+  width: 2px;
+  height: calc(46px * var(--ui));
+  background: linear-gradient(to bottom, rgba(47,168,232,0), #2FA8E8 35%, #6FD0FF);
+  box-shadow: 0 0 5px rgba(47,168,232,.85), 0 0 12px rgba(47,168,232,.45);
+}
+
+.soul-gb {
+  pointer-events: auto;
+  cursor: pointer;
+  /* Dokunma alanı ruhun kendisinden büyük: 34px'lik bir kalp parmakla zor
+     tutturulur. Padding ile büyütülüp negatif margin ile geri alınıyor,
+     görsel yerleşim değişmiyor. */
+  padding: calc(10px * var(--ui));
+  margin: calc(-10px * var(--ui));
+}
+
+.soul-art { line-height: 0 }
+
+.soul-svg {
+  width: calc(34px * var(--ui));
+  height: calc(34px * var(--ui));
+  display: block;
+  filter: drop-shadow(0 0 6px rgba(224,57,47,.55))
+          drop-shadow(0 0 14px rgba(123,63,212,.5));
+}
+
+/* Doodle Sphere'in sıcak zemininde kırmızı-mor ruh kayboluyordu; orada
+   ışıma yerine koyu bir gölge ayırıyor. */
+#screen-sphere .soul-svg {
+  filter: drop-shadow(0 2px 4px rgba(60,30,0,.45))
+          drop-shadow(0 0 10px rgba(255,255,255,.5));
+}
+#screen-sphere .soul-string {
+  background: linear-gradient(to bottom, rgba(20,120,190,0), #1E88C7 35%, #2FA8E8);
+  box-shadow: 0 0 4px rgba(20,120,190,.5);
+}

@@ -2,26 +2,38 @@ import * as backend from './db.js';
 import { createStore } from './store.js';
 import { createRingScreen } from './ring.js';
 import { createTimelineScreen } from './timeline.js';
+import { createSphereScreen } from './sphere.js';
 import { requestPersistence, isStandalone } from './platform.js';
 
 const store = createStore(backend);
 const ringRoot = document.getElementById('screen-ring');
 const tlRoot   = document.getElementById('screen-timeline');
+const sphRoot  = document.getElementById('screen-sphere');
 
-let ring, timeline;
+let ring, timeline, sphere;
 let acildi = false;      // boot() sonuna kadar geldi mi
 let panelGosterildi = false;
 
 function showRing() {
   tlRoot.setAttribute('hidden', '');
+  sphRoot.setAttribute('hidden', '');
   ringRoot.removeAttribute('hidden');
   ring.render();
 }
 
 function showTimeline(id) {
   ringRoot.setAttribute('hidden', '');
+  sphRoot.setAttribute('hidden', '');
   tlRoot.removeAttribute('hidden');
   timeline.open(id);
+}
+
+/* Hedeflerin dünyası. Ekranın üstünden sarkan ruhla girilip yine onunla
+   çıkılıyor; iki evren arasında tek geçiş noktası var. */
+function showSphere() {
+  ringRoot.setAttribute('hidden', '');
+  tlRoot.setAttribute('hidden', '');
+  sphRoot.removeAttribute('hidden');
 }
 
 /**
@@ -38,8 +50,10 @@ function acilisBasarisiz(err) {
   // Yarım kalmış ekranların rAF/interval döngüleri boşuna dönmesin
   try { if (ring) ring.destroy(); } catch (e) { /* yoksay */ }
   try { if (timeline) timeline.destroy(); } catch (e) { /* yoksay */ }
+  try { if (sphere) sphere.destroy(); } catch (e) { /* yoksay */ }
 
   tlRoot.setAttribute('hidden', '');
+  sphRoot.setAttribute('hidden', '');
   ringRoot.removeAttribute('hidden');
   ringRoot.style.pointerEvents = '';   // yükleme kilidi kalkmalı ki butona basılabilsin
   ringRoot.textContent = '';           // innerHTML KULLANILMAZ
@@ -85,7 +99,7 @@ async function boot() {
 
   /* Kabuk veritabanından ÖNCE çizilir: açılışta siyah ekran ile bozulmuş
      ekran kullanıcı gözünde birbirinin aynısıydı. */
-  ring = createRingScreen({ root: ringRoot, store, onOpen: showTimeline });
+  ring = createRingScreen({ root: ringRoot, store, onOpen: showTimeline, onSphere: showSphere });
   const bosSatir = ringRoot.querySelector('#ringEmpty');
   if (bosSatir) bosSatir.style.display = 'none';  // veri yüklenmeden "hiçbir şey yok" denmez
   ringRoot.style.pointerEvents = 'none';          // yükleme bitmeden yeni timeline açılmasın
@@ -95,6 +109,7 @@ async function boot() {
   ringRoot.style.pointerEvents = '';
   if (bosSatir) bosSatir.style.display = '';
   timeline = createTimelineScreen({ root: tlRoot, store, onBack: showRing });
+  sphere = createSphereScreen({ root: sphRoot, onBack: showRing });
   ring.render();
   acildi = true;
 
