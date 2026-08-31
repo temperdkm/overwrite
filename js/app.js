@@ -1,11 +1,13 @@
-import * as backend from './db.js';
+import { timelineBackend } from './db.js';
 import { createStore } from './store.js';
+import { createUniverseStore } from './universes.js';
 import { createRingScreen } from './ring.js';
 import { createTimelineScreen } from './timeline.js';
 import { createSphereScreen } from './sphere.js';
 import { requestPersistence, isStandalone } from './platform.js';
 
-const store = createStore(backend);
+const store = createStore(timelineBackend);
+const evrenler = createUniverseStore();   // Doodle Sphere'in adaları
 const ringRoot = document.getElementById('screen-ring');
 const tlRoot   = document.getElementById('screen-timeline');
 const sphRoot  = document.getElementById('screen-sphere');
@@ -34,6 +36,7 @@ function showSphere() {
   ringRoot.setAttribute('hidden', '');
   tlRoot.setAttribute('hidden', '');
   sphRoot.removeAttribute('hidden');
+  sphere.render();
 }
 
 /**
@@ -104,12 +107,14 @@ async function boot() {
   if (bosSatir) bosSatir.style.display = 'none';  // veri yüklenmeden "hiçbir şey yok" denmez
   ringRoot.style.pointerEvents = 'none';          // yükleme bitmeden yeni timeline açılmasın
 
-  await store.load();
+  /* İki depo BİRLİKTE yüklenir: ikisi de aynı IndexedDB bağlantısını
+     kullanıyor, sıraya dizmek açılışı boşuna uzatırdı. */
+  await Promise.all([store.load(), evrenler.load()]);
 
   ringRoot.style.pointerEvents = '';
   if (bosSatir) bosSatir.style.display = '';
   timeline = createTimelineScreen({ root: tlRoot, store, onBack: showRing });
-  sphere = createSphereScreen({ root: sphRoot, onBack: showRing });
+  sphere = createSphereScreen({ root: sphRoot, evrenler, onBack: showRing });
   ring.render();
   acildi = true;
 
@@ -118,9 +123,14 @@ async function boot() {
      hataları yutulmaz: gecikmeli yolun kullandığı bildiriciye yönlendirilir,
      kullanıcı KAYDEDİLEMEDİ göstergesini görür. */
   document.addEventListener('visibilitychange', () => {
-    if (document.visibilityState === 'hidden') store.flush().catch(store.reportError);
+    if (document.visibilityState !== 'hidden') return;
+    store.flush().catch(store.reportError);
+    evrenler.flush().catch(evrenler.reportError);
   });
-  window.addEventListener('pagehide', () => store.flush().catch(store.reportError));
+  window.addEventListener('pagehide', () => {
+    store.flush().catch(store.reportError);
+    evrenler.flush().catch(evrenler.reportError);
+  });
 
   // Kalıcı depolama isteği açılışı bloklamaz ve başarısızlığı açılışı düşürmez.
   requestPersistence()

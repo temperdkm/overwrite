@@ -2,6 +2,7 @@ import { roman } from './roman.js';
 import { RING, relIndex, placement, edgePoint } from './ring-math.js';
 import { makeGlitchButton, fireGlitch, idleGlitch } from './glitch.js';
 import { makeSoul } from './soul.js';
+import { attachRingDrag } from './drag-ring.js';
 
 const SVG_NS = 'http://www.w3.org/2000/svg';
 
@@ -221,64 +222,19 @@ export function createRingScreen({ root, store, onOpen, onSphere }) {
   window.addEventListener('resize', onResize);
 
   /* Parmakla SÜRÜKLEME. Ok butonları duruyor, bu onların yerine değil yanına.
-     Çember parmağı sürekli takip eder (adım adım sıçramaz) ve bırakınca en
-     yakın föye oturur. Sağa sürüklemek föyleri sağa götürür — yani soldaki
-     föy öne gelir; bu, içeriği tutup çekmenin doğal yönü.
-     KARAR EŞİĞİ: föye dokunmak da touchstart/touchend üretiyor. İlk 8 piksel
-     boyunca jestin ne olduğuna karar verilmez; hareket dikey ağırlıklıysa
-     sürükleme hiç başlamaz, böylece dokunuşlar çemberi çevirmez. */
-  const KARAR_PX = 8, YATAYLIK = 1.5;
-  const adimMesafesi = () => Math.max(70, (root.clientWidth || 390) * 0.30);
-  let bx = 0, by = 0, izleniyor = false, surukluyor = false, surukledi = false;
-
-  const onTouchStart = (e) => {
-    if (e.touches.length !== 1) { izleniyor = false; return; }
-    bx = e.touches[0].clientX; by = e.touches[0].clientY;
-    izleniyor = true; surukluyor = false;
-  };
-
-  const onTouchMove = (e) => {
-    if (!izleniyor || !e.touches.length) return;
-    const dx = e.touches[0].clientX - bx;
-    const dy = e.touches[0].clientY - by;
-    if (!surukluyor) {
-      if (Math.abs(dx) < KARAR_PX && Math.abs(dy) < KARAR_PX) return;
-      if (Math.abs(dx) < Math.abs(dy) * YATAYLIK) { izleniyor = false; return; }
-      surukluyor = true;
-      root.classList.add('dragging');   // geçişi kapatır, föy parmağa yapışır
+     Jestin kendisi drag-ring.js'te; burada yalnızca çemberin ona nasıl
+     tepki vereceği yazılı. */
+  const surukleyici = attachRingDrag({
+    root,
+    onSurukle: (s) => { surukleme = s; konumla(); },
+    onBitir: () => {
+      const n = store.list().length;
+      const adim = Math.round(surukleme);
+      surukleme = 0;
+      if (n && adim) cur = ((cur + adim) % n + n) % n;
+      render();
     }
-    surukleme = dx / adimMesafesi();
-    konumla();
-  };
-
-  const bitir = () => {
-    if (!surukluyor) { izleniyor = false; return; }
-    const n = store.list().length;
-    const adim = Math.round(surukleme);
-    surukleme = 0;
-    surukluyor = false;
-    izleniyor = false;
-    surukledi = true;                   // bu jestten doğacak click'i yut
-    root.classList.remove('dragging');
-    if (n && adim) cur = ((cur + adim) % n + n) % n;
-    render();
-  };
-
-  // Sürükleme bittiğinde tarayıcı ayrıca bir click üretiyor; föyün üstünde
-  // başlayan bir sürükleme yanlışlıkla timeline'ı açmasın diye yakalama
-  // aşamasında durduruluyor.
-  const onClickCapture = (e) => {
-    if (!surukledi) return;
-    surukledi = false;
-    e.stopPropagation();
-    e.preventDefault();
-  };
-
-  root.addEventListener('touchstart', onTouchStart, { passive: true });
-  root.addEventListener('touchmove', onTouchMove, { passive: true });
-  root.addEventListener('touchend', bitir, { passive: true });
-  root.addEventListener('touchcancel', bitir, { passive: true });
-  root.addEventListener('click', onClickCapture, true);
+  });
 
   // Buton kendiliğinden bozulsun. Çember ekranındayken tek buton var,
   // o yüzden aralık 3 sn; ilk açılışta (hiç timeline yokken) 2 sn —
@@ -298,11 +254,7 @@ export function createRingScreen({ root, store, onOpen, onSphere }) {
     destroy() {
       if (rafId) cancelAnimationFrame(rafId);
       window.removeEventListener('resize', onResize);
-      root.removeEventListener('touchstart', onTouchStart);
-      root.removeEventListener('touchmove', onTouchMove);
-      root.removeEventListener('touchend', bitir);
-      root.removeEventListener('touchcancel', bitir);
-      root.removeEventListener('click', onClickCapture, true);
+      surukleyici.destroy();
       clearInterval(idleTimer);
       clearInterval(firstRunTimer);
       if (soul) soul.destroy();

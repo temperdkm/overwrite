@@ -1,6 +1,8 @@
 import { describe, it, expect, beforeEach } from 'vitest';
 import 'fake-indexeddb/auto';
-import { openDb, allTimelines, putTimeline, deleteTimeline, getMeta, setMeta } from '../js/db.js';
+import { openDb, timelineBackend, universeBackend, getMeta, setMeta } from '../js/db.js';
+
+const { allTimelines, putTimeline, deleteTimeline } = timelineBackend;
 
 function tl(id, no) {
   return { id, no, ad: 'T' + no, entries: [], nextSira: 0, olusturma: 1, guncelleme: 1 };

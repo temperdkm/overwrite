@@ -1,6 +1,7 @@
 const DB_NAME = 'overwrite';
-const DB_VERSION = 1;
+const DB_VERSION = 2;
 const STORE_TIMELINES = 'timelines';
+const STORE_UNIVERSES = 'universes';   // Doodle Sphere'deki adalar (hedefler)
 const STORE_META = 'meta';
 
 let dbPromise = null;
@@ -42,6 +43,9 @@ export function openDb() {
       if (!db.objectStoreNames.contains(STORE_TIMELINES)) {
         db.createObjectStore(STORE_TIMELINES, { keyPath: 'id' });
       }
+      if (!db.objectStoreNames.contains(STORE_UNIVERSES)) {
+        db.createObjectStore(STORE_UNIVERSES, { keyPath: 'id' });
+      }
       if (!db.objectStoreNames.contains(STORE_META)) {
         db.createObjectStore(STORE_META);
       }
@@ -74,22 +78,31 @@ function wrap(request) {
   });
 }
 
-/** Bütün timeline'lar, no sırasına göre. */
-export async function allTimelines() {
-  const db = await openDb();
-  const rows = await wrap(tx(db, STORE_TIMELINES, 'readonly').getAll());
-  return rows.sort((a, b) => a.no - b.no);
+/* Timeline'lar ve adalar AYNI kayıt biçimini kullanır (id, no, ad, entries) —
+   yalnızca ayrı object store'larda dururlar. Bu yüzden erişim bir kez yazılıp
+   iki depo için üretiliyor. Yöntem adları store.js'in beklediği arayüz;
+   adlandırma timeline'lardan kalma, kayıt biçimi ise ortak. */
+function kayitErisimi(storeAdi) {
+  return {
+    /** Bütün kayıtlar, no sırasına göre. */
+    async allTimelines() {
+      const db = await openDb();
+      const rows = await wrap(tx(db, storeAdi, 'readonly').getAll());
+      return rows.sort((a, b) => a.no - b.no);
+    },
+    async putTimeline(kayit) {
+      const db = await openDb();
+      await wrap(tx(db, storeAdi, 'readwrite').put(kayit));
+    },
+    async deleteTimeline(id) {
+      const db = await openDb();
+      await wrap(tx(db, storeAdi, 'readwrite').delete(id));
+    }
+  };
 }
 
-export async function putTimeline(timeline) {
-  const db = await openDb();
-  await wrap(tx(db, STORE_TIMELINES, 'readwrite').put(timeline));
-}
-
-export async function deleteTimeline(id) {
-  const db = await openDb();
-  await wrap(tx(db, STORE_TIMELINES, 'readwrite').delete(id));
-}
+export const timelineBackend = kayitErisimi(STORE_TIMELINES);
+export const universeBackend = kayitErisimi(STORE_UNIVERSES);
 
 export async function getMeta(key) {
   const db = await openDb();

@@ -60,6 +60,10 @@
   --sheet-w: calc(82px * var(--ui));
   --sheet-h: calc(114px * var(--ui));
 
+  /* Ada kutusu föyden geniş, çünkü kayanın altı ve etiket de içine giriyor. */
+  --isle-w: calc(86px * var(--ui));
+  --isle-h: calc(134px * var(--ui));
+
   --font-pixel: 'Press Start 2P', monospace;
   /* Courier New gövde metni için zayıftı: çizgiler ince, harfler basık,
      telefonda okumak yoruyordu. ui-monospace iOS'ta SF Mono'ya düşer —

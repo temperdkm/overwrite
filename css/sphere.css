@@ -1,6 +1,16 @@
 /* DOODLE SPHERE — hedeflerin dünyası.
    OVERWRITE'ın siyah boşluğunun karşıtı: sıcak, aydınlık, açık. İki ekran
-   bakar bakmaz ayırt edilmeli, çünkü ikisinde de aynı mekanikler var. */
+   bakar bakmaz ayırt edilmeli, çünkü ikisinde de aynı mekanikler var.
+
+   KATMANLAR (alttan üste):
+     0  gökyüzü
+     1  gerili ipler ve asılı kağıtlar (manzara)
+     2  ışık zerreleri
+    10  adalar
+    30  CREATE butonu — adaların önünde kalır
+    40  başlık
+    60  ok/gösterge çubuğu
+    70  ruh (soul.css) */
 
 #screen-sphere { background: none }
 
@@ -13,9 +23,30 @@
     linear-gradient(170deg, #F7B32B 0%, #F6D06A 38%, #F3E9A8 66%, #9EDBC8 100%);
 }
 
-/* Havada süzülen ışık zerreleri. Referanstaki parıltıların karşılığı;
-   ekranın ölü durmaması için. */
-.sphere-motes { position: absolute; inset: 0; pointer-events: none; overflow: hidden }
+/* ---------- Arka plan: gerili iplere asılmış kağıtlar ---------- */
+
+.sphere-bg {
+  position: absolute; inset: 0; width: 100%; height: 100%;
+  z-index: 1; pointer-events: none;
+}
+.bg-ip     { stroke: #2FA8E8; stroke-width: 1.7; fill: none; stroke-linecap: round }
+.bg-iplik  { stroke: #2FA8E8; stroke-width: 1 }
+.bg-yaprak { fill: #FFFBEE; stroke: #C4B183; stroke-width: .8 }
+.bg-satir  { stroke: #BCA97A; stroke-width: 1 }
+
+/* Sallanma DÖNMEYLE değil ötelemeyle: SVG'de iç içe dönüşümlerde dönme
+   merkezini (transform-origin/transform-box) tarayıcılar farklı yorumluyor,
+   öteleme her yerde aynı çalışıyor. Kağıtların duruş eğimi zaten çizimde
+   sabit olarak veriliyor. */
+@keyframes kagit-suzul {
+  0%, 100% { transform: translate(0, 0) }
+  50%      { transform: translate(1.6px, -3px) }
+}
+.bg-kagit { animation: kagit-suzul var(--sure, 6s) ease-in-out infinite var(--gecikme, 0s) }
+
+/* ---------- Havada süzülen ışık zerreleri ---------- */
+
+.sphere-motes { position: absolute; inset: 0; z-index: 2; pointer-events: none; overflow: hidden }
 .mote {
   position: absolute;
   width: var(--boy); height: var(--boy);
@@ -30,19 +61,126 @@
   50%      { transform: translateY(-14px) scale(1.3); opacity: .8 }
 }
 
+/* ---------- Adalar ---------- */
+
+#sphIsles { position: absolute; inset: 0; z-index: 10 }
+
+/* Ada kutusu föyden geniş ve kısa: altındaki kaya ve üstündeki etiketle
+   birlikte tek bir dikdörtgene sığıyor. */
+#screen-sphere .pos { width: var(--isle-w); height: var(--isle-h) }
+
+.isle {
+  width: 100%; height: 100%;
+  display: flex; flex-direction: column; align-items: center;
+  cursor: pointer;
+}
+.isle-svg { width: 100%; display: block; flex: none }
+
+.isle-label {
+  display: flex; flex-direction: column; align-items: center;
+  gap: calc(2px * var(--ui));
+  margin-top: calc(2px * var(--ui));
+  text-align: center; max-width: 100%;
+}
+.isle-no {
+  font-family: var(--font-pixel); font-size: calc(6.5px * var(--ui));
+  color: #4A2A05; text-shadow: 0 1px 0 rgba(255,255,255,.85);
+  white-space: nowrap;
+}
+.isle-name {
+  font: 700 calc(7px * var(--ui)) var(--font-mono);
+  letter-spacing: calc(.5px * var(--ui));
+  color: #6B3A00; text-shadow: 0 1px 0 rgba(255,255,255,.8);
+  overflow: hidden; white-space: nowrap; text-overflow: ellipsis; max-width: 100%;
+}
+
+/* Kapının içindeki ışık nefes alır; aynı ritim çime vuran aydınlıkta da var,
+   böylece ikisi tek bir kaynakmış gibi okunuyor. */
+@keyframes kapi-nefes  { 0%, 100% { opacity: .9 }  50% { opacity: 1 } }
+@keyframes kapi-tasma  { 0%, 100% { opacity: .34 } 50% { opacity: .62 } }
+.isle-light {
+  animation: kapi-nefes 3.2s ease-in-out infinite;
+  /* Işıma kasanın ÜSTÜNE taşmamalı: fazlası koyu çerçeveyi yiyor ve kapı
+     bir açıklık değil, parlayan bir kapsül gibi görünüyor. */
+  filter: drop-shadow(0 0 2px rgba(255,255,255,.85)) drop-shadow(0 0 7px rgba(205,238,255,.7));
+}
+.isle-spill { animation: kapi-tasma 3.2s ease-in-out infinite }
+
+/* Adadan kopmuş taşlar kendi başlarına süzülür — ada sabit dursa bile
+   parça parça yüzüyormuş gibi görünsün diye. */
+@keyframes tas-suzul {
+  0%, 100% { transform: translate(0, 0) }
+  50%      { transform: translate(1.5px, -4.5px) }
+}
+.isle-pebble { animation: tas-suzul var(--sure, 6s) ease-in-out infinite var(--gecikme, 0s) }
+
+/* Doğuş: ada yokluktan çıkar. Föyün yatay ezilmesinin buradaki karşılığı;
+   üç katman kuralı gereği konum .pos'ta, süzülme .float'ta kaldığı için
+   burada yalnızca ölçek var. */
+@keyframes isle-born {
+  0%   { opacity: 0; transform: scale(.08); filter: brightness(3) }
+  18%  { opacity: 1; transform: scale(1.2) }
+  34%  { transform: scale(.88); filter: brightness(2.2) }
+  50%  { transform: scale(1.1) }
+  66%  { transform: scale(.95); filter: brightness(1.5) }
+  82%  { transform: scale(1.04) }
+  100% { opacity: 1; transform: scale(1); filter: none }
+}
+.isle.born { animation: isle-born .6s steps(1,end) 1 }
+
+/* ---------- Başlık, boş durum, CREATE, gezinme ---------- */
+
 .sphere-title {
   position: absolute; top: calc(16px * var(--ui)); left: 0; right: 0;
   text-align: center; z-index: 40;
-  font-family: var(--font-pixel);
-  font-size: calc(11px * var(--ui));
-  color: #6B3A00;
-  text-shadow: 0 1px 0 rgba(255,255,255,.75);
+  /* Çember ekranındaki .ring-head'in karşılığı: aynı yazı tipi, boy ve harf
+     aralığı. Pixel fontta yazılsaydı sağ üstteki ruhun ipine girecek kadar
+     genişlerdi. */
+  font: 700 calc(8px * var(--ui)) var(--font-mono);
+  letter-spacing: calc(3px * var(--ui));
+  color: #7A4300; opacity: .85;
+  text-shadow: 0 1px 0 rgba(255,255,255,.7);
 }
 
-.sphere-note {
-  position: absolute; left: 0; right: 0; top: 52%;
-  text-align: center; z-index: 30;
-  font: 700 calc(9px * var(--ui)) var(--font-mono);
-  letter-spacing: calc(1px * var(--ui));
-  color: rgba(107,58,0,.55);
+.sphere-empty {
+  position: absolute; left: 0; right: 0; top: 60%; text-align: center; z-index: 20;
+  font: 700 calc(8px * var(--ui)) var(--font-mono);
+  letter-spacing: calc(2px * var(--ui)); line-height: 1.9;
+  color: #7A4300; text-shadow: 0 1px 0 rgba(255,255,255,.8);
+}
+
+/* Buton doğal genişliğinde kalır, yalnızca ortalanır — .ring-ow ile aynı
+   kural. .gb inline-block olduğu için text-align onu ortalamaya yeter.
+
+   %46 DEĞİL %43: adanın kapısı çember merkezinin epey altında kalıyor
+   (kapı ~%71.5h - 61px), buton ise merkezden aşağı doğru uzuyor. %46'da
+   ikisi arasında yalnızca 6px vardı ve ~508px'ten kısa bir görünüm
+   alanında buton öndeki adanın kapısını örtüyordu. */
+.sphere-create {
+  position: absolute; left: 28px; right: 28px; top: 43%; z-index: 30;
+  text-align: center;
+}
+
+/* Sıcak gökyüzünde mor cam butonun okunması için: siyah gövde zaten kontrast
+   veriyor, dışarıya taşan halka biraz koyulaştırılıp zemine oturtuluyor. */
+#screen-sphere .chip {
+  box-shadow: 0 0 2px #fff, 0 0 9px var(--vio),
+              0 0 22px rgba(168,85,247,.6), 0 6px 16px rgba(80,40,0,.35);
+}
+
+#screen-sphere .ring-nav button {
+  background: rgba(255,255,255,.5);
+  border-color: rgba(107,58,0,.55);
+  color: #4A2A05;
+}
+#screen-sphere .ring-ind {
+  color: #4A2A05;
+  text-shadow: 0 1px 0 rgba(255,255,255,.8);
+}
+
+/* Kaydetme göstergesi sıcak gökyüzünde okunmalı: mor parıltı burada
+   kayboluyordu. Hata durumu (.fail) pembe kalıyor — o renk uyarı demek. */
+#screen-sphere .saved {
+  color: #3F2400;
+  text-shadow: 0 1px 0 rgba(255,255,255,.9);
 }
