@@ -23,15 +23,17 @@
     linear-gradient(170deg, #F7B32B 0%, #F6D06A 38%, #F3E9A8 66%, #9EDBC8 100%);
 }
 
-/* ---------- Arka plan: gerili iplere asılmış kağıtlar ---------- */
+/* ---------- Arka plan: tavandan sarkan kağıtlar ---------- */
 
 .sphere-bg {
   position: absolute; inset: 0; width: 100%; height: 100%;
   z-index: 1; pointer-events: none;
 }
-.bg-ip     { stroke: #2FA8E8; stroke-width: 1.7; fill: none; stroke-linecap: round }
-.bg-iplik  { stroke: #2FA8E8; stroke-width: 1 }
-.bg-yaprak { fill: #FFFBEE; stroke: #C4B183; stroke-width: .8 }
+/* İpler NEON DEĞİL: kendi renginde, düz. Sayfaların rengi ve saydamlığı
+   derinliğe göre değiştiği için JS'te veriliyor; burada yalnızca kalınlık. */
+.bg-ag     { stroke: #4FA9D8; stroke-width: 1.4; opacity: .26 }
+.bg-iplik  { stroke: #2FA8E8; stroke-width: 1.1 }
+.bg-yaprak { stroke-width: .9 }
 .bg-satir  { stroke: #BCA97A; stroke-width: 1 }
 
 /* Sallanma DÖNMEYLE değil ötelemeyle: SVG'de iç içe dönüşümlerde dönme
@@ -130,12 +132,12 @@
 
 /* ---------- Başlık, boş durum, CREATE, gezinme ---------- */
 
+/* .ring-head ile aynı yerde: ruhun altında. Bkz. sheets.css. */
 .sphere-title {
-  position: absolute; top: calc(16px * var(--ui)); left: 0; right: 0;
+  position: absolute; top: calc(90px * var(--ui)); left: 0; right: 0;
   text-align: center; z-index: 40;
-  /* Çember ekranındaki .ring-head'in karşılığı: aynı yazı tipi, boy ve harf
-     aralığı. Pixel fontta yazılsaydı sağ üstteki ruhun ipine girecek kadar
-     genişlerdi. */
+  /* Çember ekranındaki .ring-head'in karşılığı: aynı yazı tipi, boy ve
+     harf aralığı. */
   font: 700 calc(8px * var(--ui)) var(--font-mono);
   letter-spacing: calc(3px * var(--ui));
   color: #7A4300; opacity: .85;

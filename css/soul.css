@@ -1,11 +1,15 @@
 /* Ekranın üstünden sarkan ruh — iki dünya arasındaki geçiş.
    İp ve ruh TEK bir öğe olarak, ipin tavana bağlandığı noktadan sallanır
-   (transform-origin: 50% 0). İkisi ayrı sallansaydı ruh ipten kopardı. */
+   (transform-origin: 50% 0). İkisi ayrı sallansaydı ruh ipten kopardı.
+
+   ORTADA, kenarda değil: ip ekranın tam üst ortasından iniyor. Bu yüzden
+   ekran başlıkları (.ring-head, .sphere-title) ruhun altına indirildi —
+   eski yerlerinde kalsalardı ip yazının tam ortasından geçerdi. */
 
 .soul-hang {
   position: absolute;
   top: 0;
-  right: calc(16px * var(--ui));
+  left: 0; right: 0;
   z-index: 70;
   display: flex;
   flex-direction: column;
@@ -20,11 +24,12 @@
   50%      { transform: rotate(3.2deg) }
 }
 
+/* İP NEON DEĞİL: kendi renginde, düz. Işıma ve degrade kaldırıldı —
+   referansta ip yanmıyor, sadece ince mavi bir ip. */
 .soul-string {
   width: 2px;
   height: calc(46px * var(--ui));
-  background: linear-gradient(to bottom, rgba(47,168,232,0), #2FA8E8 35%, #6FD0FF);
-  box-shadow: 0 0 5px rgba(47,168,232,.85), 0 0 12px rgba(47,168,232,.45);
+  background: #2FA8E8;
 }
 
 .soul-gb {
@@ -39,21 +44,18 @@
 
 .soul-art { line-height: 0 }
 
+/* ÇERÇEVE YOK. Kalbin etrafında koyu bir kontur vardı ve ruhu bir çıkartma
+   gibi gösteriyordu; kaldırıldı. Kalan tek gölge, ruhu zeminden ayırmak
+   için — renkli bir ışıma değil. */
 .soul-svg {
   width: calc(34px * var(--ui));
   height: calc(34px * var(--ui));
   display: block;
-  filter: drop-shadow(0 0 6px rgba(224,57,47,.55))
-          drop-shadow(0 0 14px rgba(123,63,212,.5));
+  filter: drop-shadow(0 1px 2px rgba(0,0,0,.55));
 }
 
-/* Doodle Sphere'in sıcak zemininde kırmızı-mor ruh kayboluyordu; orada
-   ışıma yerine koyu bir gölge ayırıyor. */
+/* Doodle Sphere'in sıcak zemininde koyu gölge biraz daha belirgin olmalı;
+   yoksa ruh aydınlık gökyüzünde eriyor. */
 #screen-sphere .soul-svg {
-  filter: drop-shadow(0 2px 4px rgba(60,30,0,.45))
-          drop-shadow(0 0 10px rgba(255,255,255,.5));
-}
-#screen-sphere .soul-string {
-  background: linear-gradient(to bottom, rgba(20,120,190,0), #1E88C7 35%, #2FA8E8);
-  box-shadow: 0 0 4px rgba(20,120,190,.5);
+  filter: drop-shadow(0 2px 3px rgba(60,30,0,.45));
 }

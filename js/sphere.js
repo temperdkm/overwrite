@@ -87,9 +87,16 @@ export function createSphereScreen({ root, evrenler, onBack, onOpen }) {
   function geometry() {
     const w = root.clientWidth || 290;
     const h = root.clientHeight || 560;
+    /* rx iki kısıt arasında sıkışıyor ve 0.41 ikisini de karşılayan değer:
+       - Çok DAR olursa komşu adalar üst üste biner (0.40'ta ayrım 115px'ti,
+         ada ise 105px genişliğinde — etiketler birbirine karışıyordu).
+       - Çok GENİŞ olursa çemberin en arkasındaki ada (d=±2, elipsin yatay
+         ucu) ekrandan taşar ve etiketi kesilir (0.46'da 21px taşıyordu).
+       0.41'de ayrım 118px, en arkadaki ada ise 360px genişlikte bir ekranda
+       bile tam sığıyor. */
     return {
-      center: { x: w / 2, y: h * 0.47 },
-      radii: { rx: w * 0.40, ry: h * 0.245 }
+      center: { x: w / 2, y: h * 0.46 },
+      radii: { rx: w * 0.41, ry: h * 0.25 }
     };
   }
 
