@@ -19,7 +19,6 @@ export function createSphereScreen({ root, evrenler, onBack, onOpen }) {
   root.innerHTML =
     '<div class="sphere-sky"></div>' +
     '<div class="sphere-motes" aria-hidden="true"></div>' +
-    '<div class="sphere-title" id="sphTitle">DOODLE SPHERE</div>' +
     '<div id="sphIsles"></div>' +
     '<div class="sphere-empty" id="sphEmpty">HENÜZ HEDEF YOK.<br>YENİ BİR EVREN YARAT.</div>' +
     '<div class="sphere-create" id="sphCreate"></div>' +
@@ -87,16 +86,18 @@ export function createSphereScreen({ root, evrenler, onBack, onOpen }) {
   function geometry() {
     const w = root.clientWidth || 290;
     const h = root.clientHeight || 560;
-    /* rx iki kısıt arasında sıkışıyor ve 0.41 ikisini de karşılayan değer:
-       - Çok DAR olursa komşu adalar üst üste biner (0.40'ta ayrım 115px'ti,
-         ada ise 105px genişliğinde — etiketler birbirine karışıyordu).
+    /* rx iki kısıt arasında sıkışıyor:
+       - Çok DAR olursa komşu adalar üst üste biner ve etiketleri karışır;
+         ayrımın (rx * 0.766) iki adanın yarı genişlikleri toplamını geçmesi
+         gerekiyor.
        - Çok GENİŞ olursa çemberin en arkasındaki ada (d=±2, elipsin yatay
-         ucu) ekrandan taşar ve etiketi kesilir (0.46'da 21px taşıyordu).
-       0.41'de ayrım 118px, en arkadaki ada ise 360px genişlikte bir ekranda
-       bile tam sığıyor. */
+         ucu) ekrandan taşar ve etiketi kesilir.
+       Ada 78'den 88 birime büyütülünce iki sınır da daraldı; 0.395 ikisini
+       birden karşılayan değer ve 360px genişlikte bir ekranda bile tutuyor.
+       Adayı daha da büyütmek için bu ikisinden birinden vazgeçmek gerekir. */
     return {
       center: { x: w / 2, y: h * 0.46 },
-      radii: { rx: w * 0.41, ry: h * 0.25 }
+      radii: { rx: w * 0.395, ry: h * 0.25 }
     };
   }
 
@@ -147,10 +148,8 @@ export function createSphereScreen({ root, evrenler, onBack, onOpen }) {
     const n = list.length;
     const { center, radii } = geometry();
 
-    /* Başlık SABİT kalır, sayaç eklenmez. Sağ üstte ruhun ipi asılı duruyor
-       ve "DOODLE SPHERE · 12 UNIVERSES" ortalandığında sağ ucu ipin üstüne
-       biniyor. Sayı zaten alttaki göstergede yazıyor; buradaki tekrarı
-       kaldırmak çarpışmayı kalıcı olarak bitiriyor. */
+    /* Ekranda BAŞLIK YOK. Manzaranın kendisi nerede olduğunu zaten söylüyor;
+       hangi evrende olduğun alttaki göstergede yazıyor. */
     empty.style.display = n ? 'none' : 'block';
     nav.style.display = n ? 'flex' : 'none';
 

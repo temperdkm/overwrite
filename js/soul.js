@@ -61,19 +61,20 @@ function ruhSvg() {
       '<path d="M17.4 7.9 L15.7 9.4 L17.1 11.6" stroke="#4A1F86" stroke-width=".55" fill="none" stroke-linejoin="round"/>' +
       '<path d="M16.2 14.6 L14.5 15.7" stroke="#4A1F86" stroke-width=".45" fill="none"/>' +
 
-      /* Error'un bağı: SIKI bir sargı. Beş kuşak gövdeyi sararken hafifçe
-         aşağı bel veriyor (yuvarlak bir cismin etrafından dolanan ip böyle
-         görünür), iki dikey ip de kuşakları birbirine bağlıyor. Tek tek
-         gevşek çizgiler yerine bir ağ oluşturuyor.
+      /* ERROR'UN BAĞI — çapraz kesişen ipler.
+         Önce yatay kuşaklar denendi, kullanıcı istediği bağlanma biçimini
+         çizerek gösterdi: ipler kalbi enlemesine sarmıyor, iki üst lobun
+         tepesinden başlayıp ortada kesişerek alt uca doğru iniyor, aralarına
+         da yanlardan geçen iki ip giriyor. Uçlar siluetin BİRAZ DIŞINDA
+         bitiyor — ip arkadan dolanıyormuş gibi dursun diye.
          NEON YOK: ipin kendi rengi, ışıma eklenmiyor. */
-      '<g stroke="#2FA8E8" stroke-width=".6" fill="none" stroke-linecap="round" opacity=".92">' +
-        '<path d="M2.2 8 Q 12 8.9 21.8 8"/>' +
-        '<path d="M2.4 11 Q 12 11.9 21.6 11"/>' +
-        '<path d="M4.2 13.8 Q 12 14.7 19.8 13.8"/>' +
-        '<path d="M6.4 16.4 Q 12 17.2 17.6 16.4"/>' +
-        '<path d="M9.2 18.8 Q 12 19.5 14.8 18.8"/>' +
-        '<path d="M7.5 4.8 C 6.6 9, 8.6 15, 11.4 20.1"/>' +
-        '<path d="M16.5 4.8 C 17.4 9, 15.4 15, 12.6 20.1"/>' +
+      '<g stroke="#2FA8E8" stroke-width=".68" fill="none" stroke-linecap="round" opacity=".95">' +
+        '<path d="M4.4 3.4 C 7 9, 11 15, 14.6 20.6"/>' +
+        '<path d="M19 3.1 C 16.5 9, 12 15.2, 7.8 18.6"/>' +
+        '<path d="M3.6 14.6 C 8 11.3, 16 12.6, 20.1 14.4"/>' +
+        '<path d="M2.4 10.2 C 8 15.2, 15.2 16.2, 20.9 11.1"/>' +
+        '<path d="M9.4 3.3 C 12.2 9, 12.6 15, 12.2 21"/>' +
+        '<path d="M6.1 16.4 C 9 18.7, 13.2 19.2, 16.7 16.7"/>' +
       '</g>' +
     '</svg>';
 }

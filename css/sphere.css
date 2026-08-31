@@ -4,11 +4,10 @@
 
    KATMANLAR (alttan üste):
      0  gökyüzü
-     1  gerili ipler ve asılı kağıtlar (manzara)
+     1  asılı kağıtlar (manzara)
      2  ışık zerreleri
     10  adalar
     30  CREATE butonu — adaların önünde kalır
-    40  başlık
     60  ok/gösterge çubuğu
     70  ruh (soul.css) */
 
@@ -29,12 +28,12 @@
   position: absolute; inset: 0; width: 100%; height: 100%;
   z-index: 1; pointer-events: none;
 }
-/* İpler NEON DEĞİL: kendi renginde, düz. Sayfaların rengi ve saydamlığı
-   derinliğe göre değiştiği için JS'te veriliyor; burada yalnızca kalınlık. */
+/* İpler NEON DEĞİL: kendi renginde, düz.
+   Sayfalar DÜMDÜZ BEYAZ: çerçeve yok, satır yok. Saydamlıkları derinliğe
+   göre değiştiği için JS'te veriliyor. */
 .bg-ag     { stroke: #4FA9D8; stroke-width: 1.4; opacity: .26 }
 .bg-iplik  { stroke: #2FA8E8; stroke-width: 1.1 }
-.bg-yaprak { stroke-width: .9 }
-.bg-satir  { stroke: #BCA97A; stroke-width: 1 }
+.bg-yaprak { fill: #FFFFFF }
 
 /* Sallanma DÖNMEYLE değil ötelemeyle: SVG'de iç içe dönüşümlerde dönme
    merkezini (transform-origin/transform-box) tarayıcılar farklı yorumluyor,
@@ -131,18 +130,6 @@
 .isle.born { animation: isle-born .6s steps(1,end) 1 }
 
 /* ---------- Başlık, boş durum, CREATE, gezinme ---------- */
-
-/* .ring-head ile aynı yerde: ruhun altında. Bkz. sheets.css. */
-.sphere-title {
-  position: absolute; top: calc(90px * var(--ui)); left: 0; right: 0;
-  text-align: center; z-index: 40;
-  /* Çember ekranındaki .ring-head'in karşılığı: aynı yazı tipi, boy ve
-     harf aralığı. */
-  font: 700 calc(8px * var(--ui)) var(--font-mono);
-  letter-spacing: calc(3px * var(--ui));
-  color: #7A4300; opacity: .85;
-  text-shadow: 0 1px 0 rgba(255,255,255,.7);
-}
 
 .sphere-empty {
   position: absolute; left: 0; right: 0; top: 60%; text-align: center; z-index: 20;

@@ -25,10 +25,18 @@
 }
 
 /* İP NEON DEĞİL: kendi renginde, düz. Işıma ve degrade kaldırıldı —
-   referansta ip yanmıyor, sadece ince mavi bir ip. */
+   referansta ip yanmıyor, sadece ince mavi bir ip.
+
+   İp KALBİN ÇENTİĞİNE KADAR iniyor. Çizimde kalp 24 birimlik kutunun
+   3. biriminde başlıyor, çentik ise 5.7'de; yani SVG'nin üstünde saydam bir
+   boşluk var ve ip görünürde havada bitiyordu. 34 * 5.7/24 = 8.1 birim kadar
+   uzatılıp aynı kadar negatif margin ile geri alınıyor: ip çentiğe değiyor,
+   kalbin yeri hiç kaymıyor. Kalp DOM'da ipten sonra geldiği için ipin son
+   parçası kalbin altında kalıyor. */
 .soul-string {
   width: 2px;
-  height: calc(46px * var(--ui));
+  height: calc(46px * var(--ui) + 8.1px * var(--ui));
+  margin-bottom: calc(-8.1px * var(--ui));
   background: #2FA8E8;
 }
 
