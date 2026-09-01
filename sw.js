@@ -2,7 +2,7 @@
    uygulama mevcut sürümünde DONAR: fetch her şeyde önce önbelleğe bakar ve yeni
    service worker yalnızca sw.js'in kendi baytları değişince kurulur, yani
    telefondaki uygulamaya değişen js/css dosyaları hiç ulaşmaz. */
-const CACHE = 'overwrite-v19';
+const CACHE = 'overwrite-v20';
 const ASSETS = [
   './',
   './index.html',
@@ -16,6 +16,7 @@ const ASSETS = [
   './css/soul.css',
   './css/sphere.css',
   './css/universe.css',
+  './css/backup.css',
   './js/app.js',
   './js/roman.js',
   './js/ring-math.js',
@@ -35,6 +36,7 @@ const ASSETS = [
   './js/ink.js',
   './js/universe.js',
   './js/backup.js',
+  './js/backup-screen.js',
   './js/platform.js',
   './fonts/PressStart2P-latin.woff2',
   './fonts/PressStart2P-latin-ext.woff2',
@@ -44,8 +46,8 @@ const ASSETS = [
 
 /* addAll KULLANILMAZ: listedeki tek bir dosya bile 404 verirse
    kurulumun tamamı başarısız olur ve çevrimdışı çalışma hiç kurulmaz.
-   Bu liste henüz yazılmamış dosyaları da içeriyor (backup.js Task 13'te
-   geliyor), o yüzden her dosya tek tek ve hatası yutularak önbelleğe alınır.
+   Her dosya tek tek ve hatası yutularak önbelleğe alınır; böylece ileride
+   listeye eklenip henüz yazılmamış bir dosya bütün kurulumu düşürmez.
 
    cache: 'reload': istek tarayıcının KENDİ HTTP önbelleğini atlar. GitHub
    Pages dosyaları 10 dakika boyunca önbelleklettiği için, sürüm artırılıp

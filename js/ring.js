@@ -6,9 +6,10 @@ import { attachRingDrag } from './drag-ring.js';
 
 const SVG_NS = 'http://www.w3.org/2000/svg';
 
-export function createRingScreen({ root, store, onOpen, onSphere }) {
+export function createRingScreen({ root, store, onOpen, onSphere, onBackup }) {
   root.innerHTML =
-    '<div class="ring-head" id="ringHead">DATA COMPILATION</div>' +
+    '<div class="ring-head" id="ringHead" role="button" tabindex="0" ' +
+      'aria-label="yedek al veya geri yükle"><span></span></div>' +
     '<svg id="wires" preserveAspectRatio="none"></svg>' +
     '<div id="ringSheets"></div>' +
     '<div class="ring-empty" id="ringEmpty">HENÜZ HİÇBİR ŞEY YOK.<br>BAŞLAMAK İÇİN BAS.</div>' +
@@ -19,7 +20,7 @@ export function createRingScreen({ root, store, onOpen, onSphere }) {
       '<button type="button" id="ringNext" aria-label="sonraki">&#9658;</button>' +
     '</div>';
 
-  const head   = root.querySelector('#ringHead');
+  const head   = root.querySelector('#ringHead span');
   const wires  = root.querySelector('#wires');
   const host   = root.querySelector('#ringSheets');
   const empty  = root.querySelector('#ringEmpty');
@@ -32,6 +33,16 @@ export function createRingScreen({ root, store, onOpen, onSphere }) {
     render(tl.id);
   }});
   root.querySelector('#ringOw').appendChild(owBtn);
+
+  /* Yedek ekranının girişi: başlığın kendisi. Ekrana yeni bir buton
+     eklenmedi — sadeliği bozmamak için var olan başlık kullanılıyor. */
+  if (onBackup) {
+    const baslik = root.querySelector('#ringHead');
+    baslik.addEventListener('click', onBackup);
+    baslik.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); onBackup(); }
+    });
+  }
 
   root.querySelector('#ringPrev').addEventListener('click', () => step(-1));
   root.querySelector('#ringNext').addEventListener('click', () => step(1));

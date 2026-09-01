@@ -1,0 +1,68 @@
+/* YEDEK EKRANI — OVERWRITE'ın kendi dünyasında kalıyor: koyu zemin, mor
+   çerçeveler. Doodle Sphere'in aydınlığına geçmiyor çünkü buraya çember
+   ekranından giriliyor. */
+
+#screen-backup { overflow-y: auto; -webkit-overflow-scrolling: touch }
+
+.bk-wrap { padding: calc(58px * var(--ui)) calc(18px * var(--ui)) calc(40px * var(--ui)) }
+
+.bk-title {
+  font-family: var(--font-pixel); font-size: calc(12px * var(--ui)); line-height: 1.6;
+  color: var(--vio-br); text-shadow: 2px 2px 0 var(--bevel), 0 0 14px rgba(168,85,247,.7);
+}
+.bk-count {
+  font: 700 calc(8px * var(--ui)) var(--font-mono); letter-spacing: calc(1.6px * var(--ui));
+  color: #8B5CF6; margin-top: calc(8px * var(--ui));
+}
+
+.bk-block {
+  margin-top: calc(26px * var(--ui));
+  padding-top: calc(18px * var(--ui));
+  border-top: 1px solid rgba(168,85,247,.28);
+}
+.bk-lead {
+  font: calc(11px * var(--ui))/1.75 var(--font-mono); color: #C7A6F0;
+  margin-bottom: calc(14px * var(--ui));
+}
+
+/* Onay bloğu: tehlike rengiyle çerçeveli, çünkü buradaki tek buton geri
+   alınamaz bir işi yapıyor. */
+.bk-confirm {
+  margin-top: calc(24px * var(--ui));
+  padding: calc(14px * var(--ui));
+  border: 2px solid var(--danger);
+  background: rgba(240,80,154,.07);
+}
+.bk-found {
+  font: 700 calc(10px * var(--ui))/1.7 var(--font-mono); color: var(--vio-br);
+  white-space: pre-line;                 /* ozet iki satir olarak yaziliyor */
+  margin-bottom: calc(10px * var(--ui));
+}
+.bk-warn {
+  font: 700 calc(10px * var(--ui))/1.7 var(--font-mono); color: var(--danger-text);
+  margin-bottom: calc(14px * var(--ui));
+}
+
+.bk-status {
+  margin-top: calc(22px * var(--ui)); min-height: calc(16px * var(--ui));
+  font: calc(10px * var(--ui))/1.7 var(--font-mono); color: var(--vio-br);
+  overflow-wrap: anywhere;
+}
+.bk-status.bk-err { color: var(--danger-text) }
+
+/* Butonlar ekrana yayılmasın, doğal genişliklerinde sola dayansın. */
+#screen-backup .gb { margin-top: calc(2px * var(--ui)) }
+
+/* Çember ekranındaki giriş noktası: başlık artık dokunulabilir.
+   Yeni bir buton eklemek yerine var olan başlık kullanıldı — X!Alphys'in işi
+   zaten veriyi derlemek, ve ekranın sadeliği korunuyor. Noktalı alt çizgi
+   dokunulabilir olduğunu belli ediyor. */
+.ring-head {
+  cursor: pointer;
+  padding: calc(6px * var(--ui)) calc(10px * var(--ui));
+  margin: calc(-6px * var(--ui)) 0;      /* dokunma alanı büyür, yerleşim kaymaz */
+}
+.ring-head span {
+  border-bottom: 1px dotted rgba(168,85,247,.55);
+  padding-bottom: 2px;
+}

@@ -104,6 +104,32 @@ function kayitErisimi(storeAdi) {
 export const timelineBackend = kayitErisimi(STORE_TIMELINES);
 export const universeBackend = kayitErisimi(STORE_UNIVERSES);
 
+/**
+ * Yedekten geri yükleme: iki deponun İKİSİNİ BİRDEN tek bir IndexedDB
+ * işleminde siler ve yeniden yazar.
+ *
+ * Tek işlem olması şart. Ayrı ayrı yapılsaydı, timeline'lar silinip yazıldıktan
+ * SONRA adaların yazımı başarısız olduğunda kullanıcı yarısı yeni yarısı boş
+ * bir veriyle kalırdı — üstelik eski veri çoktan silinmiş olurdu. Tek işlemde
+ * herhangi bir adım düşerse tarayıcı hepsini geri alır ve eldeki veri olduğu
+ * gibi kalır.
+ */
+export async function replaceAll({ timelines, universes }) {
+  const db = await openDb();
+  await new Promise((resolve, reject) => {
+    const tx = db.transaction([STORE_TIMELINES, STORE_UNIVERSES], 'readwrite');
+    const t = tx.objectStore(STORE_TIMELINES);
+    const u = tx.objectStore(STORE_UNIVERSES);
+    t.clear();
+    u.clear();
+    timelines.forEach(k => t.put(k));
+    universes.forEach(k => u.put(k));
+    tx.oncomplete = () => resolve();
+    tx.onerror = () => reject(tx.error || new Error('yedek yazılamadı'));
+    tx.onabort = () => reject(tx.error || new Error('yedek yazma işlemi iptal edildi'));
+  });
+}
+
 export async function getMeta(key) {
   const db = await openDb();
   return wrap(tx(db, STORE_META, 'readonly').get(key));

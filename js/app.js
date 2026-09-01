@@ -5,6 +5,7 @@ import { createRingScreen } from './ring.js';
 import { createTimelineScreen } from './timeline.js';
 import { createSphereScreen } from './sphere.js';
 import { createUniverseScreen } from './universe.js';
+import { createBackupScreen } from './backup-screen.js';
 import { requestPersistence, isStandalone } from './platform.js';
 
 const store = createStore(timelineBackend);
@@ -13,11 +14,12 @@ const ringRoot = document.getElementById('screen-ring');
 const tlRoot   = document.getElementById('screen-timeline');
 const sphRoot  = document.getElementById('screen-sphere');
 const uvRoot   = document.getElementById('screen-universe');
+const bkRoot   = document.getElementById('screen-backup');
 
 /* Ekranlar tek listeden yönetiliyor. Eskiden her göster-fonksiyonu diğer
    ekranları TEK TEK gizliyordu; dördüncü ekran eklenince o kalıpta birini
    unutmak iki ekranın üst üste binmesi demekti. */
-const ekranlar = [ringRoot, tlRoot, sphRoot, uvRoot];
+const ekranlar = [ringRoot, tlRoot, sphRoot, uvRoot, bkRoot];
 
 function goster(hedef) {
   ekranlar.forEach(e => {
@@ -26,7 +28,7 @@ function goster(hedef) {
   });
 }
 
-let ring, timeline, sphere, universe;
+let ring, timeline, sphere, universe, backup;
 let acildi = false;      // boot() sonuna kadar geldi mi
 let panelGosterildi = false;
 
@@ -53,6 +55,12 @@ function showUniverse(id) {
   universe.open(id);
 }
 
+/* Yedek: çember ekranındaki DATA COMPILATION başlığından açılıyor. */
+function showBackup() {
+  goster(bkRoot);
+  backup.open();
+}
+
 /**
  * Açılış başarısız olursa GÖRÜNÜR bir hata paneli çizer.
  * index.html boş <section>'larla geliyor: panel olmazsa kullanıcı sadece
@@ -69,6 +77,7 @@ function acilisBasarisiz(err) {
   try { if (timeline) timeline.destroy(); } catch (e) { /* yoksay */ }
   try { if (sphere) sphere.destroy(); } catch (e) { /* yoksay */ }
   try { if (universe) universe.destroy(); } catch (e) { /* yoksay */ }
+  try { if (backup) backup.destroy(); } catch (e) { /* yoksay */ }
 
   goster(ringRoot);
   ringRoot.style.pointerEvents = '';   // yükleme kilidi kalkmalı ki butona basılabilsin
@@ -115,7 +124,8 @@ async function boot() {
 
   /* Kabuk veritabanından ÖNCE çizilir: açılışta siyah ekran ile bozulmuş
      ekran kullanıcı gözünde birbirinin aynısıydı. */
-  ring = createRingScreen({ root: ringRoot, store, onOpen: showTimeline, onSphere: showSphere });
+  ring = createRingScreen({ root: ringRoot, store, onOpen: showTimeline,
+                           onSphere: showSphere, onBackup: showBackup });
   const bosSatir = ringRoot.querySelector('#ringEmpty');
   if (bosSatir) bosSatir.style.display = 'none';  // veri yüklenmeden "hiçbir şey yok" denmez
   ringRoot.style.pointerEvents = 'none';          // yükleme bitmeden yeni timeline açılmasın
@@ -129,6 +139,8 @@ async function boot() {
   timeline = createTimelineScreen({ root: tlRoot, store, onBack: showRing });
   sphere = createSphereScreen({ root: sphRoot, evrenler, onBack: showRing, onOpen: showUniverse });
   universe = createUniverseScreen({ root: uvRoot, evrenler, onBack: showSphere });
+  backup = createBackupScreen({ root: bkRoot, store, evrenler,
+                               onBack: showRing, onRestored: showRing });
   ring.render();
   acildi = true;
 

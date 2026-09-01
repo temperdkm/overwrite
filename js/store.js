@@ -1,4 +1,6 @@
-function uid() {
+/* Kimlik üretimi tek yerde: yedekten dönen kayıtların id'si eksikse
+   backup.js de buradan üretiyor, iki farklı biçim oluşmasın diye. */
+export function uid() {
   return Date.now().toString(36) + Math.random().toString(36).slice(2, 9);
 }
 
