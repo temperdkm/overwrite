@@ -26,9 +26,13 @@ function harness({ cached = null, network } = {}) {
   const put = vi.fn(async () => {});
   const add = vi.fn(async () => {});
   const match = vi.fn(async () => cached);
+  /* match GERÇEK Cache nesnesinin üstünde — caches.match'in kendisi bilerek
+     tanımsız bırakıldı. Üst düzey caches.match() BÜTÜN önbelleklerde arar;
+     silinmemiş eski bir sürüm kalırsa oradan yanıt dönebilir. sw.js ona geri
+     dönerse bu testler TypeError ile patlar, sessizce geçmez. */
+  const cache = { put, add, match };
   const caches = {
-    open: vi.fn(async () => ({ put, add })),
-    match,
+    open: vi.fn(async () => cache),
     keys: vi.fn(async () => []),
     delete: vi.fn(async () => true)
   };
@@ -96,5 +100,25 @@ describe('service worker fetch handler', () => {
 
     // Yalnızca ilk arama yapıldı; './index.html' hiç aranmadı.
     expect(h.match).toHaveBeenCalledTimes(1);
+  });
+});
+
+/* Sayfa hangi sürümün kendisine hizmet ettiğini sorabiliyor. iOS'ta ana ekran
+   uygulaması askıya alınıp geri geldiği için kullanıcı farkında olmadan eski
+   sürümde kalabiliyor; bu mesaj o soruyu tahmine bırakmayan tek yol. */
+describe('service worker sürüm mesajı', () => {
+  it('sürüm sorulunca CACHE adını geri yollar', () => {
+    const h = harness();
+    const gelen = [];
+    h.handlers.message({ data: 'surum', source: { postMessage: (m) => gelen.push(m) } });
+    expect(gelen).toHaveLength(1);
+    expect(gelen[0].surum).toMatch(/^overwrite-v\d+$/);
+  });
+
+  it('başka bir mesaja cevap vermez', () => {
+    const h = harness();
+    const gelen = [];
+    h.handlers.message({ data: 'baska', source: { postMessage: (m) => gelen.push(m) } });
+    expect(gelen).toHaveLength(0);
   });
 });

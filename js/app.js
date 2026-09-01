@@ -7,6 +7,7 @@ import { createSphereScreen } from './sphere.js';
 import { createUniverseScreen } from './universe.js';
 import { createBackupScreen } from './backup-screen.js';
 import { requestPersistence, isStandalone } from './platform.js';
+import { kurGuncelleme } from './update.js';
 
 const store = createStore(timelineBackend);
 const evrenler = createUniverseStore();   // Doodle Sphere'in adaları
@@ -116,11 +117,11 @@ async function boot() {
   /* Service worker EN BAŞTA kaydedilir, store.load()'dan ÖNCE.
      Aksi halde ilk açılıştaki bir veritabanı hatası çevrimdışı önbelleğin
      hiç kurulmaması demekti: sonraki açılış, ağ çalışsa bile aynı şekilde
-     başarısız olurdu. */
-  if ('serviceWorker' in navigator) {
-    navigator.serviceWorker.register('./sw.js').catch(err =>
-      console.warn('service worker kaydedilemedi:', err));
-  }
+     başarısız olurdu. Kayıtla birlikte kendi kendini güncelleme de kurulur. */
+  kurGuncelleme({
+    // Yenilemeden önce bekleyen her yazma diske geçsin.
+    oncesindeYaz: () => Promise.all([store.flush(), evrenler.flush()])
+  });
 
   /* Kabuk veritabanından ÖNCE çizilir: açılışta siyah ekran ile bozulmuş
      ekran kullanıcı gözünde birbirinin aynısıydı. */

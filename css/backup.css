@@ -50,6 +50,12 @@
 }
 .bk-status.bk-err { color: var(--danger-text) }
 
+.bk-version {
+  margin-top: calc(26px * var(--ui));
+  font: 700 calc(8px * var(--ui)) var(--font-mono); letter-spacing: calc(1.4px * var(--ui));
+  color: rgba(199,125,255,.45);
+}
+
 /* Butonlar ekrana yayılmasın, doğal genişliklerinde sola dayansın. */
 #screen-backup .gb { margin-top: calc(2px * var(--ui)) }
 

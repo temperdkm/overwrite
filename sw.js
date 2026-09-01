@@ -2,7 +2,7 @@
    uygulama mevcut sürümünde DONAR: fetch her şeyde önce önbelleğe bakar ve yeni
    service worker yalnızca sw.js'in kendi baytları değişince kurulur, yani
    telefondaki uygulamaya değişen js/css dosyaları hiç ulaşmaz. */
-const CACHE = 'overwrite-v20';
+const CACHE = 'overwrite-v21';
 const ASSETS = [
   './',
   './index.html',
@@ -37,6 +37,7 @@ const ASSETS = [
   './js/universe.js',
   './js/backup.js',
   './js/backup-screen.js',
+  './js/update.js',
   './js/platform.js',
   './fonts/PressStart2P-latin.woff2',
   './fonts/PressStart2P-latin-ext.woff2',
@@ -72,10 +73,20 @@ self.addEventListener('activate', (e) => {
   );
 });
 
+/* Sayfa hangi sürümün kendisine hizmet ettiğini sorabilsin.
+   Sürüm numarasını yalnızca ben biliyorum; kullanıcı "güncellendi mi"
+   diye sorduğunda tahmin etmek yerine bakabilmeli. */
+self.addEventListener('message', (e) => {
+  if (e.data === 'surum' && e.source) e.source.postMessage({ surum: CACHE });
+});
+
 self.addEventListener('fetch', (e) => {
   if (e.request.method !== 'GET') return;
+  /* Eşleşme YALNIZCA güncel önbellekte aranır. caches.match() bütün
+     önbelleklerde arar; silinmemiş eski bir sürüm kalırsa oradan yanıt
+     dönebilirdi. */
   e.respondWith(
-    caches.match(e.request).then(hit => hit || fetch(e.request).then(res => {
+    caches.open(CACHE).then(c => c.match(e.request)).then(hit => hit || fetch(e.request).then(res => {
       const copy = res.clone();
       /* Sadece başarılı yanıtlar önbelleğe alınır: fetch() ağ hatasında reddeder
          ama 404/500 gibi HTTP hatalarında normal şekilde çözülür (res.ok === false).
@@ -88,7 +99,7 @@ self.addEventListener('fetch', (e) => {
          önbellekte olmayan bir modül isteği (örn. henüz cache'lenmemiş bir
          Task 12/13 dosyası) HTML içeriğiyle çözülür ve modül değerlendirmesi
          bütünüyle bozulur — boş ekran hatasının asıl sebebi budur. */
-      if (e.request.mode === 'navigate') return caches.match('./index.html');
+      if (e.request.mode === 'navigate') return caches.open(CACHE).then(c => c.match('./index.html'));
       throw err;
     }))
   );

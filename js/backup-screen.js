@@ -1,6 +1,7 @@
 import { makeGlitchButton, idleGlitch } from './glitch.js';
 import { disaAktar, iceAktar, ozet, dosyaAdi } from './backup.js';
 import { replaceAll } from './db.js';
+import { aktifSurum } from './update.js';
 
 /* YEDEK EKRANI — dışa aktar / içe aktar.
    OVERWRITE ekranındaki DATA COMPILATION başlığına dokununca açılıyor;
@@ -41,6 +42,7 @@ export function createBackupScreen({ root, store, evrenler, onBack, onRestored }
       '</div>' +
 
       '<div class="bk-status" id="bkStatus"></div>' +
+      '<div class="bk-version" id="bkVersion"></div>' +
     '</div>';
 
   const countEl   = root.querySelector('#bkCount');
@@ -48,6 +50,7 @@ export function createBackupScreen({ root, store, evrenler, onBack, onRestored }
   const foundEl   = root.querySelector('#bkFound');
   const statusEl  = root.querySelector('#bkStatus');
   const fileEl    = root.querySelector('#bkFile');
+  const versionEl = root.querySelector('#bkVersion');
 
   let bekleyen = null;   // okunmuş ama henüz yazılmamış yedek
 
@@ -162,6 +165,15 @@ export function createBackupScreen({ root, store, evrenler, onBack, onRestored }
       const t = store.list(), u = evrenler.list();
       countEl.textContent =
         t.length + ' TIMELINE · ' + u.length + ' UNIVERSE · ' + (say(t) + say(u)) + ' ENTRY';
+
+      /* Hangi sürümün çalıştığı GÖRÜNÜR olmalı. Kullanıcı "güncellendi mi"
+         diye sorduğunda ikimiz de tahmin etmek zorunda kalmayalım diye. */
+      versionEl.textContent = 'sürüm okunuyor...';
+      aktifSurum().then((surum) => {
+        versionEl.textContent = surum
+          ? 'ÇALIŞAN SÜRÜM: ' + surum
+          : 'ÇALIŞAN SÜRÜM: — (çevrimdışı önbellek henüz kurulmadı)';
+      });
     },
     destroy() { clearInterval(idleTimer); }
   };
