@@ -2,9 +2,8 @@
    İp ve ruh TEK bir öğe olarak, ipin tavana bağlandığı noktadan sallanır
    (transform-origin: 50% 0). İkisi ayrı sallansaydı ruh ipten kopardı.
 
-   ORTADA, kenarda değil: ip ekranın tam üst ortasından iniyor. Bu yüzden
-   ekran başlıkları (.ring-head, .sphere-title) ruhun altına indirildi —
-   eski yerlerinde kalsalardı ip yazının tam ortasından geçerdi. */
+   ORTADA, kenarda değil: ip ekranın tam üst ortasından iniyor. Üstteki alan
+   ona bırakıldı — iki ekranın da başlığı zaten kaldırıldı. */
 
 .soul-hang {
   position: absolute;

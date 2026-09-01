@@ -7,7 +7,7 @@
      1  asılı kağıtlar (manzara)
      2  ışık zerreleri
     10  adalar
-    30  CREATE butonu — adaların önünde kalır
+    30  SAVE butonu — adaların önünde kalır
     60  ok/gösterge çubuğu
     70  ruh (soul.css) */
 
@@ -145,22 +145,15 @@
 }
 
 /* Buton doğal genişliğinde kalır, yalnızca ortalanır — .ring-ow ile aynı
-   kural. .gb inline-block olduğu için text-align onu ortalamaya yeter.
+   kural. Buton inline-block olduğu için text-align onu ortalamaya yeter.
 
    %46 DEĞİL %43: adanın kapısı çember merkezinin epey altında kalıyor
    (kapı ~%71.5h - 61px), buton ise merkezden aşağı doğru uzuyor. %46'da
    ikisi arasında yalnızca 6px vardı ve ~508px'ten kısa bir görünüm
    alanında buton öndeki adanın kapısını örtüyordu. */
-.sphere-create {
+.sphere-save {
   position: absolute; left: 28px; right: 28px; top: 43%; z-index: 30;
   text-align: center;
-}
-
-/* Sıcak gökyüzünde mor cam butonun okunması için: siyah gövde zaten kontrast
-   veriyor, dışarıya taşan halka biraz koyulaştırılıp zemine oturtuluyor. */
-#screen-sphere .chip {
-  box-shadow: 0 0 2px #fff, 0 0 9px var(--vio),
-              0 0 22px rgba(168,85,247,.6), 0 6px 16px rgba(80,40,0,.35);
 }
 
 #screen-sphere .ring-nav button {

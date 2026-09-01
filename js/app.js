@@ -56,7 +56,7 @@ function showUniverse(id) {
   universe.open(id);
 }
 
-/* Yedek: çember ekranındaki DATA COMPILATION başlığından açılıyor. */
+/* Yedek: çember ekranının sol üst köşesindeki düğmeden açılıyor. */
 function showBackup() {
   goster(bkRoot);
   backup.open();

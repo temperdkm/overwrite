@@ -58,17 +58,3 @@
 
 /* Butonlar ekrana yayılmasın, doğal genişliklerinde sola dayansın. */
 #screen-backup .gb { margin-top: calc(2px * var(--ui)) }
-
-/* Çember ekranındaki giriş noktası: başlık artık dokunulabilir.
-   Yeni bir buton eklemek yerine var olan başlık kullanıldı — X!Alphys'in işi
-   zaten veriyi derlemek, ve ekranın sadeliği korunuyor. Noktalı alt çizgi
-   dokunulabilir olduğunu belli ediyor. */
-.ring-head {
-  cursor: pointer;
-  padding: calc(6px * var(--ui)) calc(10px * var(--ui));
-  margin: calc(-6px * var(--ui)) 0;      /* dokunma alanı büyür, yerleşim kaymaz */
-}
-.ring-head span {
-  border-bottom: 1px dotted rgba(168,85,247,.55);
-  padding-bottom: 2px;
-}

@@ -50,13 +50,12 @@
 .sheet.born { animation: sheet-born .48s steps(1,end) 1 }
 
 #wires { position: absolute; inset: 0; width: 100%; height: 100%; pointer-events: none; z-index: 5 }
-/* Başlık ruhun ALTINDA. Ruh artık ekranın üst ortasından sarkıyor (ip 46 +
-   kalp 34 = 80 birim), eskisi gibi en üstte dursaydı ip yazının tam
-   ortasından geçerdi. */
-.ring-head {
-  position: absolute; top: calc(90px * var(--ui)); left: 0; right: 0; text-align: center;
-  font: 700 calc(8px * var(--ui)) var(--font-mono); letter-spacing: calc(3px * var(--ui)); color: var(--vio); opacity: .5; z-index: 40;
-}
+/* Yedek ekranının girişi — sol üst köşede küçük bir düğme.
+   Ortadaki DATA COMPILATION başlığı kaldırıldı; yedekleme erişilemez
+   kalmasın diye giriş buraya taşındı, kompozisyonun ortasından uzağa. */
+.ring-data { position: absolute; top: calc(10px * var(--ui)); left: calc(10px * var(--ui)); z-index: 45 }
+.ring-data .chip .in { font-size: calc(11px * var(--ui)); padding: calc(5px * var(--ui)) calc(8px * var(--ui)) }
+
 .ring-empty {
   position: absolute; left: 0; right: 0; top: 58%; text-align: center; z-index: 20;
   font: 700 calc(8px * var(--ui)) var(--font-mono); letter-spacing: calc(2px * var(--ui)); color: #8B5CF6; opacity: .75; line-height: 1.9;

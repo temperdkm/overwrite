@@ -1,6 +1,6 @@
 import { roman } from './roman.js';
 import { relIndex, placement } from './ring-math.js';
-import { makeGlitchButton, fireGlitch, idleGlitch } from './glitch.js';
+import { makeSaveButton, setSaveAttention } from './save-button.js';
 import { makeSoul } from './soul.js';
 import { makeIsland, setIslandLabel, setIslandDrift } from './island.js';
 import { makeSphereBackground } from './sphere-bg.js';
@@ -21,7 +21,7 @@ export function createSphereScreen({ root, evrenler, onBack, onOpen }) {
     '<div class="sphere-motes" aria-hidden="true"></div>' +
     '<div id="sphIsles"></div>' +
     '<div class="sphere-empty" id="sphEmpty">HENÜZ HEDEF YOK.<br>YENİ BİR EVREN YARAT.</div>' +
-    '<div class="sphere-create" id="sphCreate"></div>' +
+    '<div class="sphere-save" id="sphSave"></div>' +
     '<div class="saved" id="sphSaved">&#9622; KAYDEDİLDİ</div>' +
     '<div class="ring-nav" id="sphNav">' +
       '<button type="button" id="sphPrev" aria-label="önceki">&#9668;</button>' +
@@ -68,13 +68,14 @@ export function createSphereScreen({ root, evrenler, onBack, onOpen }) {
     motes.appendChild(m);
   }
 
-  /* OVERWRITE'ın karşıtı: orada yazılan silinir, burada yeni bir evren doğar. */
-  const createBtn = makeGlitchButton({ label: 'CREATE', variant: 'big', onClick: () => {
+  /* OVERWRITE'ın karşıtı: orada yazılan silinir, burada yeni bir evren doğar.
+     Buton BOZULMUYOR — uygulamadaki tek glitch'siz buton, efekti parlama. */
+  const saveBtn = makeSaveButton({ label: 'yeni evren', onClick: () => {
     const u = evrenler.createUniverse();
     cur = evrenler.list().length - 1;
     render(u.id);
   }});
-  root.querySelector('#sphCreate').appendChild(createBtn);
+  root.querySelector('#sphSave').appendChild(saveBtn);
 
   root.querySelector('#sphPrev').addEventListener('click', () => step(-1));
   root.querySelector('#sphNext').addEventListener('click', () => step(1));
@@ -154,6 +155,7 @@ export function createSphereScreen({ root, evrenler, onBack, onOpen }) {
        hangi evrende olduğun alttaki göstergede yazıyor. */
     empty.style.display = n ? 'none' : 'block';
     nav.style.display = n ? 'flex' : 'none';
+    setSaveAttention(saveBtn, n === 0);
 
     const yasayan = new Set(list.map(u => u.id));
     for (const [id, rec] of nodes) if (!yasayan.has(id)) { rec.pos.remove(); nodes.delete(id); }
@@ -219,25 +221,13 @@ export function createSphereScreen({ root, evrenler, onBack, onOpen }) {
   const onResize = () => render();
   window.addEventListener('resize', onResize);
 
-  const idleTimer = idleGlitch(
-    () => (root.hasAttribute('hidden') ? [] : [createBtn]),
-    3400
-  );
-  // Hiç ada yokken buton daha sık bozulur: kullanıcı ilk bakışta neye
-  // basacağını anlasın diye. Çember ekranındaki OVERWRITE ile aynı mantık.
-  const ilkAcilisTimer = setInterval(() => {
-    if (!root.hasAttribute('hidden') && evrenler.list().length === 0) fireGlitch(createBtn);
-  }, 2200);
-
   return {
     render,
     step,
-    createButton: createBtn,
+    saveButton: saveBtn,
     destroy() {
       window.removeEventListener('resize', onResize);
       surukleyici.destroy();
-      clearInterval(idleTimer);
-      clearInterval(ilkAcilisTimer);
       soul.destroy();
     }
   };

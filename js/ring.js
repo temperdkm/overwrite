@@ -8,8 +8,7 @@ const SVG_NS = 'http://www.w3.org/2000/svg';
 
 export function createRingScreen({ root, store, onOpen, onSphere, onBackup }) {
   root.innerHTML =
-    '<div class="ring-head" id="ringHead" role="button" tabindex="0" ' +
-      'aria-label="yedek al veya geri yükle"><span></span></div>' +
+    '<div class="ring-data" id="ringData"></div>' +
     '<svg id="wires" preserveAspectRatio="none"></svg>' +
     '<div id="ringSheets"></div>' +
     '<div class="ring-empty" id="ringEmpty">HENÜZ HİÇBİR ŞEY YOK.<br>BAŞLAMAK İÇİN BAS.</div>' +
@@ -20,7 +19,6 @@ export function createRingScreen({ root, store, onOpen, onSphere, onBackup }) {
       '<button type="button" id="ringNext" aria-label="sonraki">&#9658;</button>' +
     '</div>';
 
-  const head   = root.querySelector('#ringHead span');
   const wires  = root.querySelector('#wires');
   const host   = root.querySelector('#ringSheets');
   const empty  = root.querySelector('#ringEmpty');
@@ -34,15 +32,13 @@ export function createRingScreen({ root, store, onOpen, onSphere, onBackup }) {
   }});
   root.querySelector('#ringOw').appendChild(owBtn);
 
-  /* Yedek ekranının girişi: başlığın kendisi. Ekrana yeni bir buton
-     eklenmedi — sadeliği bozmamak için var olan başlık kullanılıyor. */
-  if (onBackup) {
-    const baslik = root.querySelector('#ringHead');
-    baslik.addEventListener('click', onBackup);
-    baslik.addEventListener('keydown', (e) => {
-      if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); onBackup(); }
-    });
-  }
+  /* Yedek ekranının girişi. Eskiden ortadaki DATA COMPILATION başlığıydı;
+     başlık kaldırılınca yedekleme ERİŞİLEMEZ kalacaktı, o yüzden köşeye
+     küçük bir düğmeye taşındı. Kompozisyonun ortasından uzak duruyor. */
+  const dataBtn = onBackup
+    ? makeGlitchButton({ label: '▤', onClick: onBackup })
+    : null;
+  if (dataBtn) root.querySelector('#ringData').appendChild(dataBtn);
 
   root.querySelector('#ringPrev').addEventListener('click', () => step(-1));
   root.querySelector('#ringNext').addEventListener('click', () => step(1));
@@ -104,7 +100,6 @@ export function createRingScreen({ root, store, onOpen, onSphere, onBackup }) {
     const n = list.length;
     const { center, radii } = geometry();
 
-    head.textContent = n ? `DATA COMPILATION · ${n} TIMELINE${n === 1 ? '' : 'S'}` : 'DATA COMPILATION';
     empty.style.display = n ? 'none' : 'block';
     nav.style.display = n ? 'flex' : 'none';
 
@@ -251,7 +246,7 @@ export function createRingScreen({ root, store, onOpen, onSphere, onBackup }) {
   // o yüzden aralık 3 sn; ilk açılışta (hiç timeline yokken) 2 sn —
   // kullanıcı ilk bakışta butonun ne olduğunu anlasın diye.
   const idleTimer = idleGlitch(
-    () => (root.hasAttribute('hidden') ? [] : [owBtn]),
+    () => (root.hasAttribute('hidden') ? [] : [owBtn, dataBtn].filter(Boolean)),
     3000
   );
   const firstRunTimer = setInterval(() => {
