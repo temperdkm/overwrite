@@ -2,7 +2,7 @@ import { roman } from './roman.js';
 import { relIndex, placement } from './ring-math.js';
 import { makeGlitchButton, fireGlitch, idleGlitch } from './glitch.js';
 import { makeSoul } from './soul.js';
-import { makeIsland, setIslandLabel } from './island.js';
+import { makeIsland, setIslandLabel, setIslandDrift } from './island.js';
 import { makeSphereBackground } from './sphere-bg.js';
 import { attachRingDrag } from './drag-ring.js';
 
@@ -129,6 +129,8 @@ export function createSphereScreen({ root, evrenler, onBack, onOpen }) {
     rec.pos.style.opacity = p.opacity;
     rec.pos.style.zIndex = Math.round(p.z);   // kesirli d yüzünden yuvarlanmalı
     rec.pos.style.pointerEvents = p.visible ? 'auto' : 'none';
+    // Ada parmağı takip ederken üstündeki kağıt ters yöne kaçar.
+    setIslandDrift(rec.isle, surukleme);
   }
 
   /** Yalnızca konumlar — içerik yeniden kurulmaz (sürüklerken 60fps çağrılır). */

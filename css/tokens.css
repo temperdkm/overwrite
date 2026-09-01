@@ -60,10 +60,11 @@
   --sheet-w: calc(82px * var(--ui));
   --sheet-h: calc(114px * var(--ui));
 
-  /* Ada kutusu föyden geniş ve kısa: referanstaki ada geniş ve sığ.
-     Yükseklik = çizimin oranı (86 x 112/100 = 96) + etiket (~20). */
+  /* Ada kutusu föyden geniş. Yükseklik = çizimin oranı (88 x 140/100 = 123)
+     + etiket (~20). Çizim kapı kaldırılıp yerine tavandan sarkan kağıt
+     gelince uzadı: kağıt adanın ÜSTÜNDE duruyor. */
   --isle-w: calc(88px * var(--ui));
-  --isle-h: calc(119px * var(--ui));
+  --isle-h: calc(143px * var(--ui));
 
   --font-pixel: 'Press Start 2P', monospace;
   /* Courier New gövde metni için zayıftı: çizgiler ince, harfler basık,

@@ -1,57 +1,71 @@
-/* UÇAN ADA + KAPI — Doodle Sphere'deki bir hedefin görünüşü.
-   Tamamen SVG olarak çiziliyor: her ekran boyutunda net kalması, kapının
-   içindeki ışığın nefes alması ve altındaki taşların ayrı ayrı süzülmesi
+/* UÇAN ADA + ASILI KAĞIT — Doodle Sphere'deki bir hedefin görünüşü.
+   Tamamen SVG olarak çiziliyor: her ekran boyutunda net kalması, kopmuş
+   taşların ayrı ayrı süzülmesi ve kağıdın parmakla sürüklerken kayması
    gerekiyor; hazır bir görsel bunların hiçbirini yapamaz.
 
-   REFERANSTAKİ ADA: düz bir tepe yüzeyi, altında kırık yüzeyli, aşağı doğru
-   daralan koyu bir kaya. ÇİZGİSİZ — hiçbir yerde kontur yok, biçimi yalnızca
-   dolgu renkleri ayırıyor. İlk denemede parlak yeşil çim ve koyu konturlar
-   vardı; referansta ikisi de yok. Ada eninden derin de değil: geniş ve sığ.
+   KAPI YOK. Önce adanın üstünde içinden beyaz ışık sızan bir kapı vardı;
+   tamamen kaldırıldı. Yerine, arka plandakilerin aynısı bir kağıt tavandan
+   sarkıyor ve Error'un ipleri onu ruhu sardığı gibi sarıyor. Evrene artık
+   o kağıttan giriliyor.
+
+   ADA: düz bir tepe yüzeyi, altında kırık yüzeyli, aşağı doğru daralan koyu
+   bir kaya. ÇİZGİSİZ — hiçbir yerde kontur yok, biçimi yalnızca dolgu
+   renkleri ayırıyor.
 
    İÇERİDE id KULLANILMAZ (gradient/filter tanımı yok). Aynı ada ekranda
    birden çok kez çizildiği için her id sayfada tekrarlanır ve tarayıcı
-   hepsini ilkine bağlar; ışıma bu yüzden CSS drop-shadow ile veriliyor.
+   hepsini ilkine bağlar; gölge bu yüzden CSS drop-shadow ile veriliyor.
 
    Adalar birbirinin AYNISI. Kullanıcı "timeline'ların kendine özgün olması"
    fikrini bıraktı; ayırt edici olan numara ve ad, görünüş değil. */
 
 const CIZIM =
-  '<svg class="isle-svg" viewBox="0 0 100 112" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">' +
+  '<svg class="isle-svg" viewBox="0 0 100 140" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">' +
 
     /* Adadan kopmuş, altında süzülen taşlar */
     '<g class="isle-pebble" style="--sure:5.4s;--gecikme:0s">' +
-      '<path d="M15 96 l7-5 6 5-4 7-7 1z" fill="#544A3B"/></g>' +
+      '<path d="M15 124 l7-5 6 5-4 7-7 1z" fill="#544A3B"/></g>' +
     '<g class="isle-pebble" style="--sure:6.8s;--gecikme:1.3s">' +
-      '<path d="M78 88 l6-4 5 5-4 6-6 1z" fill="#463D30"/></g>' +
+      '<path d="M78 116 l6-4 5 5-4 6-6 1z" fill="#463D30"/></g>' +
     '<g class="isle-pebble" style="--sure:6.1s;--gecikme:2.6s">' +
-      '<path d="M57 106 l5-4 5 4-3 5-6 1z" fill="#544A3B"/></g>' +
+      '<path d="M57 134 l5-4 5 4-3 5-6 1z" fill="#544A3B"/></g>' +
 
     /* Kaya gövdesi: geniş, sığ, kırık yüzeyli */
-    '<path d="M4 52 L8 66 L4 71 L14 80 L11 88 L21 91 L28 100 L36 93 ' +
-            'L44 105 L52 92 L61 97 L66 87 L76 82 L73 75 L84 68 L96 52 Z" fill="#4A4133"/>' +
+    '<path d="M4 94 L8 106 L4 111 L14 119 L11 126 L21 129 L28 137 L36 131 ' +
+            'L44 140 L52 130 L61 134 L66 126 L76 121 L73 115 L84 108 L96 94 Z" fill="#4A4133"/>' +
     /* Işık alan sol yüz — gölge sınırı kontur değil, iki dolgunun sınırı */
-    '<path d="M4 52 L8 66 L4 71 L14 80 L11 88 L21 91 L28 100 L36 93 ' +
-            'L44 105 L48 96 L48 52 Z" fill="#5C5142"/>' +
+    '<path d="M4 94 L8 106 L4 111 L14 119 L11 126 L21 129 L28 137 L36 131 ' +
+            'L44 140 L48 132 L48 94 Z" fill="#5C5142"/>' +
 
     /* Tepe yüzeyi: önce kenarın koyusu, üstüne düzlük. Gövdeden yalnızca
        BİRAZ açık — fark büyük olunca ada mantara benziyordu. */
-    '<ellipse cx="50" cy="52" rx="46" ry="8.5" fill="#5E5343"/>' +
-    '<ellipse cx="50" cy="50" rx="44.5" ry="7.5" fill="#7A6C57"/>' +
+    '<ellipse cx="50" cy="94" rx="46" ry="8.5" fill="#5E5343"/>' +
+    '<ellipse cx="50" cy="92" rx="44.5" ry="7.5" fill="#7A6C57"/>' +
 
-    /* Kapının tepe yüzeyine vuran ışığı — kapı açık, ışık dışarı sızıyor */
-    '<ellipse class="isle-spill" cx="50" cy="52" rx="18" ry="5" fill="#FFFFFF"/>' +
+    /* TAVANDAN SARKAN KAĞIT.
+       Kendi grubunda duruyor: parmakla sürüklerken ip, kağıt ve saran ipler
+       birlikte kayıyor, ada yerinde kalıyor.
 
-    /* KAPI. Eninden UZUN: 30 birim geniş, 46 birim yüksek. İlk halinde
-       kemerin yarıçapı genişliğin yarısıydı, kapı boyundan geniş çıkıyor ve
-       mezar taşı gibi duruyordu. Kasa koyu bir DOLGU — kontur yok. */
-    '<path d="M35 52 L35 21 A15 15 0 0 1 65 21 L65 52 Z" fill="#2E1B10"/>' +
-    '<path d="M38 52 L38 22 A12 12 0 0 1 62 22 L62 52 Z" fill="#4A3220"/>' +
-    '<g class="isle-light">' +
-      '<path d="M40 52 L40 23 A10 10 0 0 1 60 23 L60 52 Z" fill="#E4F2FF"/>' +
-      '<path d="M46 52 L46 27 A4 4 0 0 1 54 27 L54 52 Z" fill="#FFFFFF"/>' +
+       İP KUTUNUN DIŞINA TAŞIYOR (y = -170). Kısa bir ip havada kesiliyor ve
+       kağıt tavandan değil hiçbir yerden sarkıyormuş gibi duruyordu; uzun ip
+       arka plandaki ip ormanına karışıp gerçekten yukarıdan geliyor gibi
+       oluyor. Taşabilmesi için .isle-svg'de overflow: visible var. */
+    '<g class="isle-kagit">' +
+      '<line class="isle-ip" x1="50" y1="-170" x2="50" y2="21"/>' +
+      '<rect class="isle-yaprak" x="26" y="20" width="48" height="64"/>' +
+
+      /* Error'un bağı — ruhtaki ile aynı mantık: enlemesine kuşak yok,
+         hepsi çapraz ve ortada kesişiyor. Uçlar kağıdın kenarının BİRAZ
+         DIŞINDA bitiyor, ip arkadan dolanıyormuş gibi dursun diye. */
+      '<g class="isle-bag">' +
+        '<path d="M28 24 C 40 40, 56 58, 72 80"/>' +
+        '<path d="M72 24 C 60 40, 44 58, 28 80"/>' +
+        '<path d="M24 42 C 40 51, 60 55, 76 46"/>' +
+        '<path d="M24 66 C 40 57, 60 61, 76 70"/>' +
+        '<path d="M42 18 C 45 40, 45 62, 43 86"/>' +
+        '<path d="M60 18 C 57 40, 57 62, 59 86"/>' +
+      '</g>' +
     '</g>' +
-    /* Eşik: kapının bir yüzey değil AÇIKLIK olduğunu belli ediyor */
-    '<rect x="39" y="51" width="22" height="1.6" fill="#2E1B10"/>' +
   '</svg>';
 
 /** Bir adanın DOM'unu kurar. Etiket metni SONRA setIslandLabel ile yazılır. */
@@ -77,4 +91,25 @@ export function makeIsland() {
 export function setIslandLabel(el, numaraMetni, ad) {
   el.querySelector('.isle-no').textContent = numaraMetni;
   el.querySelector('.isle-name').textContent = ad || '';
+}
+
+/* Parmakla sürüklerken kağıdın KAYMASI.
+   Ada parmağı takip ederken kağıt TERS yöne kaçıyor: havada asılı bir şey
+   taşındığında geride kalır.
+
+   Değer SVG kullanıcı birimi cinsinden (kağıt 48, ada 100 birim eninde), bu
+   yüzden sınır dar: kağıt adanın dışına taşmamalı. Dönüş değil ÖTELEME —
+   SVG'de dönme merkezini iç içe dönüşümlerde tarayıcılar farklı yorumluyor,
+   öteleme her yerde aynı çalışıyor. */
+const KAYMA_KATSAYI = 9;
+const KAYMA_SINIR = 13;
+
+/**
+ * @param el         .isle kök öğesi
+ * @param surukleme  kesirli adım kayması; sağa sürüklemek pozitif
+ */
+export function setIslandDrift(el, surukleme) {
+  const ham = -surukleme * KAYMA_KATSAYI;
+  const kay = Math.max(-KAYMA_SINIR, Math.min(KAYMA_SINIR, ham));
+  el.style.setProperty('--kagit-kay', kay.toFixed(2) + 'px');
 }

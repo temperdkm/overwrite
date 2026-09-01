@@ -75,7 +75,8 @@
   display: flex; flex-direction: column; align-items: center;
   cursor: pointer;
 }
-.isle-svg { width: 100%; display: block; flex: none }
+/* overflow: visible — kağıdın ipi kutunun üstüne taşıp tavana gidiyor. */
+.isle-svg { width: 100%; display: block; flex: none; overflow: visible }
 
 .isle-label {
   display: flex; flex-direction: column; align-items: center;
@@ -95,17 +96,19 @@
   overflow: hidden; white-space: nowrap; text-overflow: ellipsis; max-width: 100%;
 }
 
-/* Kapının içindeki ışık nefes alır; aynı ritim çime vuran aydınlıkta da var,
-   böylece ikisi tek bir kaynakmış gibi okunuyor. */
-@keyframes kapi-nefes  { 0%, 100% { opacity: .9 }  50% { opacity: 1 } }
-@keyframes kapi-tasma  { 0%, 100% { opacity: .34 } 50% { opacity: .62 } }
-.isle-light {
-  animation: kapi-nefes 3.2s ease-in-out infinite;
-  /* Işıma kasanın ÜSTÜNE taşmamalı: fazlası koyu çerçeveyi yiyor ve kapı
-     bir açıklık değil, parlayan bir kapsül gibi görünüyor. */
-  filter: drop-shadow(0 0 2px rgba(255,255,255,.85)) drop-shadow(0 0 7px rgba(205,238,255,.7));
-}
-.isle-spill { animation: kapi-tasma 3.2s ease-in-out infinite }
+/* TAVANDAN SARKAN KAĞIT — kapının yerini aldı.
+   Sayfa DÜMDÜZ BEYAZ, arka plandakiler gibi: çerçeve yok, üstünde yazı yok.
+   Aydınlık gökyüzünde kaybolmasın diye kontur değil GÖLGE veriliyor. */
+.isle-yaprak { fill: #FFFFFF; filter: drop-shadow(0 3px 4px rgba(70,45,5,.35)) }
+.isle-ip  { stroke: #2FA8E8; stroke-width: 1.5 }
+/* Sargı inceltildi: kalın olunca kağıdı örtüyor, kağıt değil ip görünüyordu. */
+.isle-bag { stroke: #2FA8E8; stroke-width: 1.25; fill: none; stroke-linecap: round }
+
+/* Parmakla sürüklerken kağıt TERS yöne kayıyor — havada asılı bir şey
+   taşındığında geride kalır. Sürüklerken geçiş kapalı ki kağıt parmağı
+   anında takip etsin; parmak kalkınca sınıf kalkar ve kağıt yerine oturur. */
+.isle-kagit { transform: translateX(var(--kagit-kay, 0px)); transition: transform .55s cubic-bezier(.22,.7,.28,1) }
+.dragging .isle-kagit { transition: none }
 
 /* Adadan kopmuş taşlar kendi başlarına süzülür — ada sabit dursa bile
    parça parça yüzüyormuş gibi görünsün diye. */

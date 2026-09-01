@@ -1,6 +1,7 @@
-/* KAPININ ARKASI — bir hedefin notları.
-   Zemin, kapının içindeki beyaz ışığın devamı: ortada aydınlık, kenarlara
-   doğru Doodle Sphere'in sıcak tonlarına dönüyor. Kapıdan geçtiğin yer. */
+/* KAĞIDIN İÇİ — bir hedefin notları.
+   Zemin kağıdın kendi beyazı: ortada aydınlık, kenarlara doğru Doodle
+   Sphere'in sıcak tonlarına dönüyor. Adanın üstünde sarkan kağıda dokununca
+   buraya giriliyor. */
 
 #screen-universe {
   display: flex; flex-direction: column;
