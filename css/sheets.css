@@ -53,7 +53,11 @@
 /* Yedek ekranının girişi — sol üst köşede küçük bir düğme.
    Ortadaki DATA COMPILATION başlığı kaldırıldı; yedekleme erişilemez
    kalmasın diye giriş buraya taşındı, kompozisyonun ortasından uzağa. */
-.ring-data { position: absolute; top: calc(10px * var(--ui)); left: calc(10px * var(--ui)); z-index: 45 }
+.ring-data {
+  position: absolute; z-index: 45;
+  top: calc(10px * var(--ui) + env(safe-area-inset-top));
+  left: calc(10px * var(--ui));
+}
 .ring-data .chip .in { font-size: calc(11px * var(--ui)); padding: calc(5px * var(--ui)) calc(8px * var(--ui)) }
 
 .ring-empty {
@@ -69,7 +73,7 @@
 .ring-ow { position: absolute; left: 28px; right: 28px; top: 46%; z-index: 30;
            text-align: center }
 .ring-nav {
-  position: absolute; bottom: 12px; left: 0; right: 0; z-index: 60;
+  position: absolute; bottom: calc(12px + env(safe-area-inset-bottom)); left: 0; right: 0; z-index: 60;
   display: flex; align-items: center; justify-content: center; gap: 12px;
 }
 .ring-nav button {

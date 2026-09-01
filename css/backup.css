@@ -4,7 +4,10 @@
 
 #screen-backup { overflow-y: auto; -webkit-overflow-scrolling: touch }
 
-.bk-wrap { padding: calc(58px * var(--ui)) calc(18px * var(--ui)) calc(40px * var(--ui)) }
+.bk-wrap {
+  padding: calc(58px * var(--ui) + env(safe-area-inset-top)) calc(18px * var(--ui))
+           calc(40px * var(--ui) + env(safe-area-inset-bottom));
+}
 
 .bk-title {
   font-family: var(--font-pixel); font-size: calc(12px * var(--ui)); line-height: 1.6;

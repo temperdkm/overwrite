@@ -15,11 +15,14 @@ html, body {
   overscroll-behavior: none;
 }
 
-/* iOS'ta ana ekran uygulamasında güvenli alanı boyar */
-body {
-  padding: env(safe-area-inset-top) env(safe-area-inset-right)
-           env(safe-area-inset-bottom) env(safe-area-inset-left);
-}
+/* GÜVENLİ ALAN BOŞLUĞU GÖVDEDE DEĞİL, İÇERİDE.
+   Eskiden body'ye env(safe-area-*) kadar padding veriliyordu; #app o boşluğun
+   İÇİNDE kalıyor ve altta kalan şeritte body'nin koyu zemini görünüyordu.
+   OVERWRITE ekranı zaten siyah olduğu için fark edilmiyordu, Doodle Sphere
+   aydınlık olunca ekranın altında siyah bir bant çıktı.
+   Artık #app baştan sona uzanıyor — zemin kenarlara kadar gidiyor — ve
+   çentikten/ana ekran çubuğundan kaçması gereken YALNIZCA denetimler kendi
+   içlerinde env() kadar itiliyor. */
 
 /* Uygulama telefon için tasarlandı ve çember geometrisi ekran genişliğine
    oranlı hesaplanıyor. Sınır olmadan geniş bir masaüstü ekranında föyler

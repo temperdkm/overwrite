@@ -25,7 +25,7 @@
 
 /* ---------- Başlık: evrenin adı Ink'in kafasının üstünde ---------- */
 
-.uhead { padding: calc(54px * var(--ui)) calc(16px * var(--ui)) 0; position: relative; z-index: 2 }
+.uhead { padding: calc(54px * var(--ui) + env(safe-area-inset-top)) calc(16px * var(--ui)) 0; position: relative; z-index: 2 }
 
 .ukicker {
   font-family: var(--font-pixel); font-size: calc(10px * var(--ui));
@@ -55,7 +55,8 @@
 .note-scroll {
   flex: 1 1 auto; min-height: 0;   /* min-height: 0 olmadan flex öğesi küçülmez, taşar */
   overflow-y: auto; -webkit-overflow-scrolling: touch;
-  padding: calc(16px * var(--ui)) calc(14px * var(--ui)) calc(96px * var(--ui));
+  padding: calc(16px * var(--ui)) calc(14px * var(--ui))
+           calc(96px * var(--ui) + env(safe-area-inset-bottom));
   z-index: 2;
 }
 /* Kuyruk kalkınca kartlar arasında ona ayrılan yere gerek kalmadı; yine de
