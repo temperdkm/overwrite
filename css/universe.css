@@ -40,51 +40,17 @@
 .uname:focus { box-shadow: inset 0 -2px 0 rgba(122,67,0,.6) }
 .uname.ph:before { color: rgba(59,36,5,.35); font-style: normal }
 
-.urow { display: flex; align-items: flex-end; gap: calc(10px * var(--ui)) }
 .umeta {
   font: 700 calc(7px * var(--ui)) var(--font-mono); letter-spacing: calc(2px * var(--ui));
-  color: #8A6A2E; padding-bottom: calc(14px * var(--ui));
+  color: #8A6A2E; margin-top: calc(9px * var(--ui));
+}
+/* Çember ekranındaki .trule'nin karşılığı — başlığı listeden ayırıyor. */
+.urule {
+  height: 1px; margin: calc(12px * var(--ui)) 0 0; opacity: .5;
+  background: linear-gradient(to right, transparent, #B98A3A, transparent);
 }
 
-/* ---------- Ink!Sans ---------- */
-
-.ink { width: calc(84px * var(--ui)); flex: none }
-.ink-svg { width: 100%; display: block }
-
-/* GÖZLERDEKİ MÜREKKEP: üç şekil sırayla görünüyor, her birinin kendi rengi
-   var — yani hem şekil hem renk değişiyor. Geçiş yok, ATLIYOR: Ink'in gözleri
-   kanonda da bir kareden diğerine sıçrar.
-   Sağ göz döngünün üçte biri kadar kaydırılmış, böylece iki göz hiçbir zaman
-   aynı şekli göstermiyor. */
-@keyframes ink-s1 { 0%, 32% { opacity: 1 } 33%, 100% { opacity: 0 } }
-@keyframes ink-s2 { 0%, 32% { opacity: 0 } 33%, 65% { opacity: 1 } 66%, 100% { opacity: 0 } }
-@keyframes ink-s3 { 0%, 65% { opacity: 0 } 66%, 100% { opacity: 1 } }
-.ink-s1 { animation: ink-s1 6.6s steps(1, end) infinite }
-.ink-s2 { animation: ink-s2 6.6s steps(1, end) infinite }
-.ink-s3 { animation: ink-s3 6.6s steps(1, end) infinite }
-.ink-sag .ink-sekil { animation-delay: -2.2s }
-
-/* GÖZ KIRPMA — boştaki tek hareketi. Döngünün yalnızca %4'ünde (7.4s'nin
-   ~300ms'i) gözler kapanıyor; daha uzun olsaydı uykulu görünürdü. */
-@keyframes ink-goz-ac   { 0%, 95% { opacity: 1 } 96%, 99% { opacity: 0 } 100% { opacity: 1 } }
-@keyframes ink-goz-kapa { 0%, 95% { opacity: 0 } 96%, 99% { opacity: 1 } 100% { opacity: 0 } }
-.ink-goz-acik   { animation: ink-goz-ac   7.4s steps(1, end) infinite }
-.ink-goz-kapali { animation: ink-goz-kapa 7.4s steps(1, end) infinite }
-
-/* AĞIZ: iki hâl üst üste; konuşurken sırayla görünüyorlar.
-   steps(1,end) ile geçiş yok — ağız açılıp kapanıyor, erimiyor. */
-.ink-agiz-acik { opacity: 0 }
-@keyframes agiz-kapa { 0%, 49% { opacity: 1 } 50%, 100% { opacity: 0 } }
-@keyframes agiz-ac   { 0%, 49% { opacity: 0 } 50%, 100% { opacity: 1 } }
-.ink.konusuyor .ink-agiz-kapali { animation: agiz-kapa .2s steps(1, end) infinite }
-.ink.konusuyor .ink-agiz-acik   { animation: agiz-ac   .2s steps(1, end) infinite }
-
-/* Konuşurken hafif bir baş hareketi — ağzın oynaması tek başına
-   "konuşuyor" demiyor, gövdenin ritmi gerekiyor. */
-@keyframes ink-ritim { 0%, 100% { transform: translateY(0) } 50% { transform: translateY(-2px) } }
-.ink.konusuyor .ink-svg { animation: ink-ritim .4s ease-in-out infinite }
-
-/* ---------- Notlar: Underverse konuşma balonları ---------- */
+/* ---------- Notlar ---------- */
 
 .note-scroll {
   flex: 1 1 auto; min-height: 0;   /* min-height: 0 olmadan flex öğesi küçülmez, taşar */
@@ -92,16 +58,17 @@
   padding: calc(16px * var(--ui)) calc(14px * var(--ui)) calc(96px * var(--ui));
   z-index: 2;
 }
-/* Balonlar arası boşluk .slot'un varsayılan 12px'inden GENİŞ olmalı:
-   kuyruk balonun üstüne 16px taşıyor (45° döndürülmüş 19px'lik kare), yani
-   12px'te her kuyruk bir üstteki balonun içine 4px giriyordu. */
-.note-scroll .slot { margin-bottom: calc(22px * var(--ui)) }
+/* Kuyruk kalkınca kartlar arasında ona ayrılan yere gerek kalmadı; yine de
+   varsayılan 12px'ten biraz açık duruyorlar. */
+.note-scroll .slot { margin-bottom: calc(13px * var(--ui)) }
 
 .note-scroll::-webkit-scrollbar { width: 3px }
 .note-scroll::-webkit-scrollbar-thumb { background: rgba(122,67,0,.35); border-radius: 3px }
 
-/* Oyunun diyalog kutusu: siyah gövde, beyaz çerçeve. */
-.bubble {
+/* Oyunun diyalog kutusu: siyah gövde, beyaz çerçeve. KUYRUK YOK — kuyruk
+   kartı konuşma balonuna çeviren şeydi ve Ink kaldırılınca konuşan kimse
+   kalmadı. Panel olarak duruyor. */
+.ncard {
   position: relative;
   background: var(--px-doku);
   border: 2px solid #FFFFFF;
@@ -111,35 +78,24 @@
   box-shadow: 0 3px 10px rgba(60,40,0,.28);
 }
 
-/* Kuyruk: 45° döndürülmüş bir kare. Üst-sol iki kenarı beyaz olduğu için
-   balonun çerçevesiyle kesintisiz birleşiyor. */
-.btail {
-  position: absolute; top: calc(-9px * var(--ui)); left: calc(22px * var(--ui));
-  width: calc(14px * var(--ui)); height: calc(14px * var(--ui));
-  background: #1B1826;
-  border-left: 2px solid #FFFFFF;
-  border-top: 2px solid #FFFFFF;
-  transform: rotate(45deg);
-}
-
-.brow { display: flex; align-items: baseline; gap: calc(6px * var(--ui)) }
-.bnum {
+.nrow { display: flex; align-items: baseline; gap: calc(6px * var(--ui)) }
+.nnum {
   font-family: var(--font-pixel); font-size: calc(8px * var(--ui));
   color: #FFD98A; white-space: nowrap; flex: none;
 }
-.bsep { color: rgba(255,255,255,.35); font: 700 calc(9px * var(--ui)) var(--font-mono); flex: none }
-.bname {
+.nsep { color: rgba(255,255,255,.35); font: 700 calc(9px * var(--ui)) var(--font-mono); flex: none }
+.nname {
   flex: 1 1 auto; min-width: 0;
   font: 700 calc(9px * var(--ui)) var(--font-mono); letter-spacing: calc(.5px * var(--ui));
   color: #FFFFFF; outline: none; overflow-wrap: anywhere;
 }
-.bname:focus { box-shadow: inset 0 -1px 0 rgba(255,255,255,.6) }
-.bname.ph:before, .btxt.ph:before { color: rgba(243,239,228,.38) }
+.nname:focus { box-shadow: inset 0 -1px 0 rgba(255,255,255,.6) }
+.nname.ph:before, .ntxt.ph:before { color: rgba(243,239,228,.38) }
 
 /* Silme kalıcı ve geri alınamaz; dokunma alanı Apple'ın 44px minimumuna
    padding ile büyütülüp aynı miktarda negatif margin ile geri alınıyor,
    görsel yerleşim değişmiyor. Föy kartındaki .edel ile aynı kural. */
-.bdel {
+.ndel {
   font: 700 calc(11px * var(--ui)) var(--font-mono); color: #FF9AC6; cursor: pointer; opacity: .8;
   user-select: none; flex: none;
   padding: calc(22px * var(--ui)) calc(26px * var(--ui)) calc(9px * var(--ui)) calc(12px * var(--ui));
@@ -148,15 +104,15 @@
 
 /* Föydeki beyaz kontura burada gerek yok: yazı zaten koyu zemin üzerinde
    beyaz, kontur onu bulanıklaştırırdı. */
-.btxt {
+.ntxt {
   font: calc(12px * var(--ui))/1.55 var(--font-mono); color: #EDE8DA;
   margin-top: calc(8px * var(--ui)); outline: none; min-height: calc(16px * var(--ui));
   border-top: 1px solid rgba(255,255,255,.22); padding-top: calc(7px * var(--ui));
   overflow-wrap: anywhere;
 }
 
-/* Doğuş: diyalog kutusu açılırken yatay olarak yayılır. */
-@keyframes bubble-born {
+/* Doğuş: kart açılırken yatay olarak yayılır. */
+@keyframes ncard-born {
   0%   { opacity: 0; transform: scaleX(.1) scaleY(.5); filter: brightness(2.4) }
   18%  { opacity: 1; transform: scaleX(1.14) scaleY(.8) }
   36%  { transform: scaleX(.92) scaleY(1.08); filter: brightness(1.8) }
@@ -164,7 +120,7 @@
   76%  { transform: scaleX(.97) scaleY(1.02); filter: brightness(1.2) }
   100% { opacity: 1; transform: none; filter: none }
 }
-.bubble.born { animation: bubble-born .42s steps(1, end) 1 }
+.ncard.born { animation: ncard-born .42s steps(1, end) 1 }
 
 /* Kaydetme göstergesi aydınlık zeminde okunmalı. */
 #screen-universe .saved { color: #3F2400; text-shadow: 0 1px 0 rgba(255,255,255,.9) }

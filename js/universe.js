@@ -2,23 +2,16 @@ import { roman } from './roman.js';
 import { bindEditable, setText } from './editable.js';
 import { makeGlitchButton, idleGlitch } from './glitch.js';
 import { dissolveCard, dissolveAll } from './dissolve.js';
-import { makeInk, inkKonusuyor } from './ink.js';
 
-/* KAPININ ARKASI — bir hedefin notları.
+/* KAĞIDIN İÇİ — bir hedefin notları.
    Timeline ekranının Doodle Sphere'deki karşılığı ve mekanik olarak onun
    birebir aynısı: aynı butonlar, aynı otomatik kayıt, aynı konumsal
-   numaralandırma, aynı pençe→glitch→piksel silme animasyonu. Değişen
-   yalnızca sahne — burada Ink!Sans var ve notlar onun konuşma balonları.
+   numaralandırma, aynı pençe→glitch→piksel silme animasyonu.
 
-   Evrenin adı INK'İN KAFASININ ÜSTÜNDE duruyor; ada çemberindeki etiket de
-   oradan besleniyor.
-
-   Yazarken Ink'in ağzı oynuyor. Konuşma hâli yazının kendisinden değil,
-   yazmanın DURMASINDAN kapanıyor: her tuş vuruşunda sayaç sıfırlanıyor,
-   700 ms sessizlikten sonra ağız kapanıyor. Aksi halde ağız her karakterde
-   bir açılıp kapanır, konuşmaz. */
-
-const SUSMA_MS = 700;
+   Burada önce Ink!Sans duruyor ve notlar onun konuşma balonlarıydı. Ink
+   kaldırıldı; konuşan kimse kalmayınca balonun kuyruğu da anlamsızlaştı, o
+   yüzden kartlar düz panel oldu. Evrenin adı da artık başlıkta — kimsenin
+   kafasının üstünde değil. Ada çemberindeki etiket yine buradan besleniyor. */
 
 export function createUniverseScreen({ root, evrenler, onBack }) {
   root.innerHTML =
@@ -26,7 +19,8 @@ export function createUniverseScreen({ root, evrenler, onBack }) {
     '<div class="uhead">' +
       '<div class="ukicker" id="uvKicker">UNIVERSE</div>' +
       '<div class="uname" id="uvName" contenteditable="true" spellcheck="false" data-ph="isim ver..."></div>' +
-      '<div class="urow"><span id="uvInk"></span><span class="umeta" id="uvMeta">0 ENTRIES</span></div>' +
+      '<div class="umeta" id="uvMeta">0 ENTRIES</div>' +
+      '<div class="urule"></div>' +
     '</div>' +
     '<div class="note-scroll" id="uvScroll"></div>' +
     '<div class="saved" id="uvSaved">&#9622; KAYDEDİLDİ</div>' +
@@ -38,18 +32,7 @@ export function createUniverseScreen({ root, evrenler, onBack }) {
   const scroll  = root.querySelector('#uvScroll');
   const savedEl = root.querySelector('#uvSaved');
 
-  const ink = makeInk();
-  root.querySelector('#uvInk').appendChild(ink);
-
   let openId = null;
-  let susmaTimer = null;
-
-  /** Her tuş vuruşunda çağrılır: ağzı açar, sessizlik sayacını sıfırlar. */
-  function konusmayaBasla() {
-    inkKonusuyor(ink, true);
-    clearTimeout(susmaTimer);
-    susmaTimer = setTimeout(() => inkKonusuyor(ink, false), SUSMA_MS);
-  }
 
   const backBtn  = makeGlitchButton({ label: '◄ GERI', onClick: () => { openId = null; onBack(); } });
   const eraseBtn = makeGlitchButton({ label: 'ERASE', variant: 'danger', onClick: () => eraseUniverse() });
@@ -65,7 +48,6 @@ export function createUniverseScreen({ root, evrenler, onBack }) {
 
   bindEditable(nameEl, {
     onChange: (text) => {
-      konusmayaBasla();
       if (openId) evrenler.update(openId, (u) => { u.ad = text.trim(); });
     }
   });
@@ -105,7 +87,7 @@ export function createUniverseScreen({ root, evrenler, onBack }) {
     scroll.querySelectorAll('.slot[data-note-id]').forEach(slot => {
       const not = u.entries.find(e => e.id === slot.dataset.noteId);
       if (!not) return;
-      const etiket = slot.querySelector('.bnum');
+      const etiket = slot.querySelector('.nnum');
       if (etiket) etiket.textContent = 'ENTRY ' + not.sira;
     });
   }
@@ -115,31 +97,30 @@ export function createUniverseScreen({ root, evrenler, onBack }) {
     slot.className = 'slot';
     slot.dataset.noteId = not.id;
     const card = document.createElement('div');
-    card.className = 'bubble';
+    card.className = 'ncard';
     card.innerHTML =
-      '<div class="btail" aria-hidden="true"></div>' +
-      '<div class="brow">' +
-        '<div class="bnum"></div><div class="bsep">-</div>' +
-        '<div class="bname" contenteditable="true" spellcheck="false" data-ph="isim ver..."></div>' +
-        '<div class="bdel" role="button" aria-label="sil">&#10005;</div>' +
+      '<div class="nrow">' +
+        '<div class="nnum"></div><div class="nsep">-</div>' +
+        '<div class="nname" contenteditable="true" spellcheck="false" data-ph="isim ver..."></div>' +
+        '<div class="ndel" role="button" aria-label="sil">&#10005;</div>' +
       '</div>' +
-      '<div class="btxt" contenteditable="true" spellcheck="false" data-ph="buraya yaz..."></div>';
+      '<div class="ntxt" contenteditable="true" spellcheck="false" data-ph="buraya yaz..."></div>';
     slot.appendChild(card);
 
-    card.querySelector('.bnum').textContent = 'ENTRY ' + not.sira;
-    const nameField = card.querySelector('.bname');
-    const textField = card.querySelector('.btxt');
+    card.querySelector('.nnum').textContent = 'ENTRY ' + not.sira;
+    const nameField = card.querySelector('.nname');
+    const textField = card.querySelector('.ntxt');
     setText(nameField, not.ad);      // güvenli
     setText(textField, not.metin);   // güvenli
 
     bindEditable(nameField, {
-      onChange: (t) => { konusmayaBasla(); evrenler.update(u.id, () => { not.ad = t.trim(); }); }
+      onChange: (t) => evrenler.update(u.id, () => { not.ad = t.trim(); })
     });
     bindEditable(textField, {
-      onChange: (t) => { konusmayaBasla(); evrenler.update(u.id, () => { not.metin = t; }); }
+      onChange: (t) => evrenler.update(u.id, () => { not.metin = t; })
     });
 
-    card.querySelector('.bdel').addEventListener('click', () => {
+    card.querySelector('.ndel').addEventListener('click', () => {
       evrenler.deleteNote(u.id, not.id);
       // Etiketler hemen tazelenir: dağılma animasyonu ~1 sn sürüyor, o süre
       // boyunca kalan kartlar yanlış numara göstermemeli.
@@ -163,12 +144,12 @@ export function createUniverseScreen({ root, evrenler, onBack }) {
     if (!u) return;
     const not = evrenler.addNote(u.id);
     const slot = noteCard(u, not);
-    slot.querySelector('.bubble').classList.add('born');
+    slot.querySelector('.ncard').classList.add('born');
     scroll.appendChild(slot);
     meta();
     setTimeout(() => {
       slot.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
-      slot.querySelector('.bname').focus();
+      slot.querySelector('.nname').focus();
     }, 140);
   }
 
@@ -185,7 +166,7 @@ export function createUniverseScreen({ root, evrenler, onBack }) {
       closed = true;
       onBack();
     };
-    dissolveAll({ scroll, kartSecici: '.bubble', onDone: close });
+    dissolveAll({ scroll, kartSecici: '.ncard', onDone: close });
   }
 
   return {
@@ -196,12 +177,8 @@ export function createUniverseScreen({ root, evrenler, onBack }) {
       kicker.textContent = 'UNIVERSE ' + roman(u.no);
       setText(nameEl, u.ad || '');   // güvenli
       nameEl.classList.toggle('ph', !(u.ad || '').trim());
-      inkKonusuyor(ink, false);
       renderNotes();
     },
-    destroy() {
-      clearInterval(idleTimer);
-      clearTimeout(susmaTimer);
-    }
+    destroy() { clearInterval(idleTimer); }
   };
 }

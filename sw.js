@@ -2,7 +2,7 @@
    uygulama mevcut sürümünde DONAR: fetch her şeyde önce önbelleğe bakar ve yeni
    service worker yalnızca sw.js'in kendi baytları değişince kurulur, yani
    telefondaki uygulamaya değişen js/css dosyaları hiç ulaşmaz. */
-const CACHE = 'overwrite-v26';
+const CACHE = 'overwrite-v27';
 const ASSETS = [
   './',
   './index.html',
@@ -34,7 +34,6 @@ const ASSETS = [
   './js/sphere.js',
   './js/sphere-bg.js',
   './js/island.js',
-  './js/ink.js',
   './js/universe.js',
   './js/backup.js',
   './js/backup-screen.js',

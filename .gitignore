@@ -7,3 +7,7 @@ Thumbs.db
 overwrite-yedek*.json
 *-yedek*.json
 backup*.json
+
+# Referans görselleri yerelde kalır — depo herkese açık, başkasının
+# çizimi burada yayınlanmaz.
+inksans.png
