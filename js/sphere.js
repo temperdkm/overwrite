@@ -101,14 +101,14 @@ export function createSphereScreen({ root, evrenler, onBack, onOpen }) {
     };
   }
 
-  function makeNode(i) {
+  function makeNode(u, i) {
     const pos = document.createElement('div');
     pos.className = 'pos';
     const flo = document.createElement('div');
     flo.className = 'float';
     flo.style.setProperty('--fd', (4.6 + (i % 5) * 0.31).toFixed(2) + 's');
     flo.style.setProperty('--fdl', ((i * 430) % 2300) + 'ms');
-    const isle = makeIsland();
+    const isle = makeIsland(u.id);   // sargı deseni kimliğe bağlı, kalıcı
     flo.appendChild(isle); pos.appendChild(flo); host.appendChild(pos);
     return { pos, float: flo, isle };
   }
@@ -164,7 +164,7 @@ export function createSphereScreen({ root, evrenler, onBack, onOpen }) {
     list.forEach((u, i) => {
       let rec = nodes.get(u.id);
       const yeni = !rec;
-      if (yeni) { rec = makeNode(i); nodes.set(u.id, rec); }
+      if (yeni) { rec = makeNode(u, i); nodes.set(u.id, rec); }
       setIslandLabel(rec.isle, 'UNIVERSE ' + roman(u.no), u.ad);
 
       // Yeni ada geçişsiz olarak yerine konur, sonra geçiş açılır; aksi

@@ -19,7 +19,73 @@
    Adalar birbirinin AYNISI. Kullanıcı "timeline'ların kendine özgün olması"
    fikrini bıraktı; ayırt edici olan numara ve ad, görünüş değil. */
 
-const CIZIM =
+/* Kağıdın sınırları ve iplerin ne kadar dışına taştığı. */
+const SOL = 26, SAG = 74, UST = 20, ALT = 84, TASMA = 3;
+
+/* Sabit tohumlu üretici. Math.random KULLANILMIYOR: sargı bir adaya bir kez
+   verilip hep aynı kalmalı, yoksa her yeniden çizimde ipler yerinden zıplar. */
+function uretici(tohum) {
+  let s = tohum >>> 0;
+  return () => {
+    s = (s * 1664525 + 1013904223) >>> 0;
+    return s / 4294967296;
+  };
+}
+
+/* Evren id'sinden sayı — her adanın sargısı kendine özgü ama kalıcı olsun. */
+function tohumla(metin) {
+  let h = 2166136261 >>> 0;
+  for (let i = 0; i < metin.length; i++) {
+    h ^= metin.charCodeAt(i);
+    h = Math.imul(h, 16777619) >>> 0;
+  }
+  return h >>> 0;
+}
+
+/**
+ * Error'un bağı — kağıdı saran ipler.
+ * Ruhtaki ile aynı mantık: enlemesine kuşak yok, hepsi çapraz ve ortada
+ * kesişiyor, uçlar kağıdın kenarının biraz DIŞINDA bitiyor (ip arkadan
+ * dolanıyormuş gibi dursun diye).
+ *
+ * Elle yazılmış altı yol yerine üretiliyor: sabit desen simetrik bir yıldıza
+ * benziyordu, elle sarılmış bir ipe değil. Uçlar kenarlarda, kontrol
+ * noktaları kağıdın İÇİNDE tutuluyor — böylece rastgelelik ipleri kağıttan
+ * fırlatamıyor, yalnızca desenini bozuyor.
+ */
+function bagYollari(rnd) {
+  const yollar = [];
+  const ara = (a, b) => a + rnd() * (b - a);
+  const n = (v) => v.toFixed(1);
+
+  // Tepeden tabana geçen, dikeye yakın ipler
+  for (let i = 0; i < 3; i++) {
+    yollar.push('M' + n(ara(SOL + 2, SAG - 2)) + ' ' + (UST - TASMA) +
+      ' C ' + n(ara(SOL, SAG)) + ' ' + n(UST + 20) +
+      ', ' + n(ara(SOL, SAG)) + ' ' + n(ALT - 20) +
+      ', ' + n(ara(SOL + 2, SAG - 2)) + ' ' + (ALT + TASMA));
+  }
+  // Kenardan kenara geçen, yataya yakın ipler
+  for (let i = 0; i < 2; i++) {
+    yollar.push('M' + (SOL - TASMA) + ' ' + n(ara(UST + 4, ALT - 4)) +
+      ' C ' + n(SOL + 14) + ' ' + n(ara(UST, ALT)) +
+      ', ' + n(SAG - 14) + ' ' + n(ara(UST, ALT)) +
+      ', ' + (SAG + TASMA) + ' ' + n(ara(UST + 4, ALT - 4)));
+  }
+  // Köşeden köşeye çaprazlar
+  for (let i = 0; i < 2; i++) {
+    const solda = rnd() < 0.5;
+    yollar.push('M' + (solda ? SOL - TASMA : SAG + TASMA) + ' ' + n(ara(UST - TASMA, UST + 18)) +
+      ' C ' + n(ara(SOL, SAG)) + ' ' + n(ara(UST, ALT)) +
+      ', ' + n(ara(SOL, SAG)) + ' ' + n(ara(UST, ALT)) +
+      ', ' + (solda ? SAG + TASMA : SOL - TASMA) + ' ' + n(ara(ALT - 18, ALT + TASMA)));
+  }
+  return yollar;
+}
+
+function cizim(tohum) {
+  const rnd = uretici(tohum);
+  return '' +
   '<svg class="isle-svg" viewBox="0 0 100 140" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">' +
 
     /* Adadan kopmuş, altında süzülen taşlar */
@@ -46,33 +112,31 @@ const CIZIM =
        Kendi grubunda duruyor: parmakla sürüklerken ip, kağıt ve saran ipler
        birlikte kayıyor, ada yerinde kalıyor.
 
-       İP KUTUNUN DIŞINA TAŞIYOR (y = -170). Kısa bir ip havada kesiliyor ve
-       kağıt tavandan değil hiçbir yerden sarkıyormuş gibi duruyordu; uzun ip
-       arka plandaki ip ormanına karışıp gerçekten yukarıdan geliyor gibi
-       oluyor. Taşabilmesi için .isle-svg'de overflow: visible var. */
+       İP EKRANIN TEPESİNE KADAR gidiyor (y = -900 birim, .isle-svg'de
+       overflow: visible). Kısa bir ip havada kesiliyordu. Tek bir uzun değer
+       yetiyor çünkü #app zaten taşanı kırpıyor: adanın ekranda nerede
+       durduğunu hesaplamaya gerek yok, her konumda tepeyi geçiyor.
+       Ruhun (z-index 70) arkasından geçiyor, adalar z-index 10'da. */
     '<g class="isle-kagit">' +
-      '<line class="isle-ip" x1="50" y1="-170" x2="50" y2="21"/>' +
-      '<rect class="isle-yaprak" x="26" y="20" width="48" height="64"/>' +
-
-      /* Error'un bağı — ruhtaki ile aynı mantık: enlemesine kuşak yok,
-         hepsi çapraz ve ortada kesişiyor. Uçlar kağıdın kenarının BİRAZ
-         DIŞINDA bitiyor, ip arkadan dolanıyormuş gibi dursun diye. */
+      '<line class="isle-ip" x1="50" y1="-900" x2="50" y2="21"/>' +
+      '<rect class="isle-yaprak" x="' + SOL + '" y="' + UST + '" ' +
+            'width="' + (SAG - SOL) + '" height="' + (ALT - UST) + '"/>' +
       '<g class="isle-bag">' +
-        '<path d="M28 24 C 40 40, 56 58, 72 80"/>' +
-        '<path d="M72 24 C 60 40, 44 58, 28 80"/>' +
-        '<path d="M24 42 C 40 51, 60 55, 76 46"/>' +
-        '<path d="M24 66 C 40 57, 60 61, 76 70"/>' +
-        '<path d="M42 18 C 45 40, 45 62, 43 86"/>' +
-        '<path d="M60 18 C 57 40, 57 62, 59 86"/>' +
+        bagYollari(rnd).map(d => '<path d="' + d + '"/>').join('') +
       '</g>' +
     '</g>' +
   '</svg>';
+}
 
-/** Bir adanın DOM'unu kurar. Etiket metni SONRA setIslandLabel ile yazılır. */
-export function makeIsland() {
+/**
+ * Bir adanın DOM'unu kurar. Etiket metni SONRA setIslandLabel ile yazılır.
+ * @param kimlik  evren id'si — sargı deseninin tohumu. Aynı ada her zaman
+ *                aynı sargıyla çizilsin diye kimliğe bağlı.
+ */
+export function makeIsland(kimlik) {
   const el = document.createElement('div');
   el.className = 'isle';
-  el.innerHTML = CIZIM;               // kullanıcı metni İÇERMEZ, sabit çizim
+  el.innerHTML = cizim(tohumla(String(kimlik || '')));   // kullanıcı metni İÇERMEZ
 
   const etiket = document.createElement('div');
   etiket.className = 'isle-label';
