@@ -14,10 +14,12 @@
   animation: save-isik 4.2s ease-in-out infinite;
 }
 
-/* Parlama ÇERÇEVEDE: sürekli yanmıyor, aralıklarla bir kez güçleniyor. */
+/* Parlama ÇERÇEVEDE ve KISIK: duruşta beyaz ışıma HİÇ yok, yalnızca zemine
+   düşen yumuşak bir gölge var. Işıma kısa bir an için beliriyor. İlk hâli
+   sürekli yanıyordu ve buton fazla parlaktı. */
 @keyframes save-isik {
-  0%, 100% { box-shadow: 0 0 10px rgba(255,255,255,.35), 0 5px 16px rgba(90,55,10,.35) }
-  22%      { box-shadow: 0 0 28px rgba(255,255,255,.9),  0 5px 16px rgba(90,55,10,.35) }
+  0%, 100% { box-shadow: 0 3px 12px rgba(70,45,10,.38) }
+  22%      { box-shadow: 0 0 14px rgba(255,255,255,.45), 0 3px 12px rgba(70,45,10,.38) }
 }
 
 .save-in {
@@ -26,13 +28,11 @@
   border-radius: calc(2px * var(--ui));
   padding: calc(10px * var(--ui)) calc(16px * var(--ui));
   display: flex; align-items: center; gap: calc(9px * var(--ui));
-  /* SAYDAM: arkadaki gökyüzü ve kağıtlar görünüyor. Üstte soluk bir
-     gökkuşağı, altında beyaz bir tabaka. */
-  background:
-    linear-gradient(100deg,
-      rgba(255,87,217,.26) 0%, rgba(180,92,255,.20) 25%, rgba(79,168,255,.20) 50%,
-      rgba(139,232,79,.24) 75%, rgba(242,228,79,.26) 100%),
-    rgba(255,255,255,.34);
+  /* İÇİ SİYAH, biraz saydam: arkadaki gökyüzü ve kağıtlar hafifçe görünüyor.
+     Gökkuşağı YALNIZCA çerçevede ve yazıda — referansta da öyle. İlk hâlinde
+     iç de gökkuşağıydı ve buton göz alıyordu. Uygulamanın diğer butonlarının
+     saf siyah gövdesiyle de bu şekilde aynı aileden. */
+  background: rgba(10, 7, 16, .76);
 }
 
 /* Işık süpürmesi: butonun üstünden geçip kayboluyor, sonra bekliyor.
@@ -42,7 +42,7 @@
   content: '';
   position: absolute; inset: 0;
   background: linear-gradient(105deg,
-    rgba(255,255,255,0) 36%, rgba(255,255,255,.85) 50%, rgba(255,255,255,0) 64%);
+    rgba(255,255,255,0) 40%, rgba(255,255,255,.30) 50%, rgba(255,255,255,0) 60%);
   transform: translateX(-140%);
   animation: save-parilti 4.2s ease-in-out infinite;
   pointer-events: none;
@@ -55,8 +55,8 @@
 .save-star {
   width: calc(17px * var(--ui)); height: calc(17px * var(--ui));
   flex: none; display: block;
-  fill: #FFFFFF;
-  filter: drop-shadow(0 0 5px rgba(255,255,255,.95));
+  fill: #F4EAFF;
+  filter: drop-shadow(0 0 4px rgba(255,255,255,.55));
 }
 
 /* Harfler de gökkuşağı ama soluk: çerçeveyle aynı renk sırası, içine beyaz
@@ -67,13 +67,16 @@
   line-height: 1;
   letter-spacing: calc(1px * var(--ui));
   background: linear-gradient(100deg,
-    #FFC2F0 0%, #E3C2FF 25%, #C2E6FF 50%, #CFF7D6 75%, #F7F2C2 100%);
+    #FF9BE4 0%, #C9A5FF 25%, #9BD8FF 50%, #A9F0C4 75%, #F3EBA6 100%);
   -webkit-background-clip: text;
   background-clip: text;
   color: transparent;
   -webkit-text-fill-color: transparent;
-  filter: drop-shadow(0 2px 0 rgba(110,35,130,.5))
-          drop-shadow(0 0 9px rgba(255,255,255,.75));
+  /* text-shadow DEĞİL filter: dolgu saydam olduğu için text-shadow harflerin
+     içinden görünürdü. drop-shadow birleşmiş sonucun üstünde çalışıyor.
+     Beyaz ışıma kaldırıldı, yalnızca piksel yazıya gereken koyu kabartma
+     kaldı — yazı da fazla parlıyordu. */
+  filter: drop-shadow(2px 2px 0 rgba(0,0,0,.55));
 }
 
 /* Hiç ada yokken daha sık parlar — dikkat çeksin diye. */
