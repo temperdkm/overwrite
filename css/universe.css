@@ -48,21 +48,28 @@
 
 /* ---------- Ink!Sans ---------- */
 
-.ink { width: calc(74px * var(--ui)); flex: none }
+.ink { width: calc(84px * var(--ui)); flex: none }
 .ink-svg { width: 100%; display: block }
 
-/* Gözlerdeki mürekkep rengi ATLAYARAK değişir, geçişle değil: Ink'in
-   gözleri kanonda da bir kareden diğerine sıçrar. İki göz aynı döngüyü
-   yarım tur kaydırılmış olarak sürüyor, böylece hiç eşleşmiyorlar. */
-@keyframes ink-renk {
-  0%   { fill: #F2C14E }
-  25%  { fill: #4FB0E8 }
-  50%  { fill: #E85A6B }
-  75%  { fill: #5CC98C }
-  100% { fill: #F2C14E }
-}
-.ink-goz-sol { animation: ink-renk 7s steps(1, end) infinite }
-.ink-goz-sag { animation: ink-renk 7s steps(1, end) infinite -3.5s }
+/* GÖZLERDEKİ MÜREKKEP: üç şekil sırayla görünüyor, her birinin kendi rengi
+   var — yani hem şekil hem renk değişiyor. Geçiş yok, ATLIYOR: Ink'in gözleri
+   kanonda da bir kareden diğerine sıçrar.
+   Sağ göz döngünün üçte biri kadar kaydırılmış, böylece iki göz hiçbir zaman
+   aynı şekli göstermiyor. */
+@keyframes ink-s1 { 0%, 32% { opacity: 1 } 33%, 100% { opacity: 0 } }
+@keyframes ink-s2 { 0%, 32% { opacity: 0 } 33%, 65% { opacity: 1 } 66%, 100% { opacity: 0 } }
+@keyframes ink-s3 { 0%, 65% { opacity: 0 } 66%, 100% { opacity: 1 } }
+.ink-s1 { animation: ink-s1 6.6s steps(1, end) infinite }
+.ink-s2 { animation: ink-s2 6.6s steps(1, end) infinite }
+.ink-s3 { animation: ink-s3 6.6s steps(1, end) infinite }
+.ink-sag .ink-sekil { animation-delay: -2.2s }
+
+/* GÖZ KIRPMA — boştaki tek hareketi. Döngünün yalnızca %4'ünde (7.4s'nin
+   ~300ms'i) gözler kapanıyor; daha uzun olsaydı uykulu görünürdü. */
+@keyframes ink-goz-ac   { 0%, 95% { opacity: 1 } 96%, 99% { opacity: 0 } 100% { opacity: 1 } }
+@keyframes ink-goz-kapa { 0%, 95% { opacity: 0 } 96%, 99% { opacity: 1 } 100% { opacity: 0 } }
+.ink-goz-acik   { animation: ink-goz-ac   7.4s steps(1, end) infinite }
+.ink-goz-kapali { animation: ink-goz-kapa 7.4s steps(1, end) infinite }
 
 /* AĞIZ: iki hâl üst üste; konuşurken sırayla görünüyorlar.
    steps(1,end) ile geçiş yok — ağız açılıp kapanıyor, erimiyor. */
@@ -85,6 +92,11 @@
   padding: calc(16px * var(--ui)) calc(14px * var(--ui)) calc(96px * var(--ui));
   z-index: 2;
 }
+/* Balonlar arası boşluk .slot'un varsayılan 12px'inden GENİŞ olmalı:
+   kuyruk balonun üstüne 16px taşıyor (45° döndürülmüş 19px'lik kare), yani
+   12px'te her kuyruk bir üstteki balonun içine 4px giriyordu. */
+.note-scroll .slot { margin-bottom: calc(22px * var(--ui)) }
+
 .note-scroll::-webkit-scrollbar { width: 3px }
 .note-scroll::-webkit-scrollbar-thumb { background: rgba(122,67,0,.35); border-radius: 3px }
 
